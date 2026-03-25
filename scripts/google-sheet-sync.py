@@ -105,7 +105,7 @@ def rows_from_csv(path: Path) -> list[list[str]]:
             location = clean_text(row.get("location", ""))
             notes = clean_text(row.get("notes", ""))
             source = clean_text(row.get("source", "")) or clean_text(row.get("platform", "")) or "Imported"
-            applied_by = clean_text(row.get("applied_by", "")) or "YOUR_NAME"
+            applied_by = clean_text(row.get("applied_by", "")) or "Agent"
             url = clean_text(row.get("url", ""))
             output.append(
                 [

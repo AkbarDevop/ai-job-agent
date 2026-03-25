@@ -108,8 +108,13 @@ print_ok "playwright-core installed"
 echo ""
 echo "  Do you want to install Playwright browsers? (needed for headless automation)"
 echo "  This downloads Chromium (~150MB). You can skip if you'll use your system Chrome."
-read -p "  Install Playwright browsers? [y/N] " -n 1 -r
-echo ""
+if [[ -t 0 ]]; then
+  read -p "  Install Playwright browsers? [y/N] " -n 1 -r
+  echo ""
+else
+  REPLY="n"
+  echo "  Non-interactive mode detected — skipping Playwright browser install."
+fi
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   npx playwright install chromium
   print_ok "Playwright Chromium installed"

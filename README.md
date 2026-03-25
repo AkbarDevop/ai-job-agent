@@ -52,15 +52,15 @@ node scripts/linkedin-easy-apply.js \
   "https://www.linkedin.com/jobs/view/1234567890" \
   config/linkedin-config.json
 
-# Lever
+# Lever (uses same config format)
 node scripts/lever-apply.js \
   "https://jobs.lever.co/company/job-id" \
-  config/lever-config.json
+  config/linkedin-config.json
 
-# Greenhouse
+# Greenhouse (uses same config format)
 node scripts/greenhouse-apply.js \
   "https://boards.greenhouse.io/company/jobs/12345" \
-  config/greenhouse-config.json
+  config/linkedin-config.json
 ```
 
 Each script outputs structured JSON to stdout so it can be piped to other tools or consumed by an AI agent.

@@ -589,7 +589,14 @@ async function clickContinue(dialog) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true, channel: 'chrome' });
+  const cdpUrl = process.env.CDP_URL;
+  const headless = process.env.HEADLESS !== '0';
+  const launchOptions = process.env.PW_CHANNEL
+    ? { headless, channel: process.env.PW_CHANNEL }
+    : { headless };
+  const browser = cdpUrl
+    ? await chromium.connectOverCDP(cdpUrl)
+    : await chromium.launch(launchOptions);
   const context = await browser.newContext();
   await context.addCookies(buildCookies());
   const page = await context.newPage();
@@ -621,7 +628,7 @@ async function main() {
                 await sel.selectOption({ label: picked });
               } catch (e1) {
                 try { await sel.selectOption(picked); } catch (e2) {
-                  console.error(JSON.stringify({ debug: 'select-failed', picked, error: e2.message?.slice(0, 100) }));
+                  console.error(JSON.stringify({ stage: 'select-fallback-failed', picked, error: e2.message?.slice(0, 100) }));
                 }
               }
               report.selected.push(`fallback:${picked}`);
@@ -660,6 +667,15 @@ async function main() {
       console.error(JSON.stringify({ stage: 'blocked', step, unknown }));
       await browser.close();
       process.exit(2);
+    }
+
+    // Check if next click would be the final submit
+    const submitBtn = dialog.getByRole('button', { name: /submit application/i });
+    const isSubmitStep = (await submitBtn.count()) > 0;
+    if (isSubmitStep && config.autoSubmit === false) {
+      console.log(JSON.stringify({ stage: 'dry-run', step, message: 'autoSubmit is false — stopping before submission' }));
+      await browser.close();
+      return;
     }
 
     const clicked = await clickContinue(dialog);

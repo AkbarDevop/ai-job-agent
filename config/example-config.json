@@ -36,8 +36,8 @@
   "eeoRace": "Decline to self-identify",
   "eeoVeteran": "No",
   "projectPitch": "I am passionate about distributed systems and full-stack development. My senior project involved building a real-time collaboration tool using WebSockets and React.",
-  "resumePath": "/Users/jane/Documents/resume.pdf",
-  "chromeCookiePath": "/Users/jane/Library/Application Support/Google/Chrome/Default/Cookies",
+  "resumePath": "/path/to/your/resume.pdf",
+  "chromeCookiePath": "/path/to/Chrome/Default/Cookies",
 
   "_comment": "This is an example config. Copy linkedin-config.template.json and fill in your own values.",
 

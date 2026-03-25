@@ -1,5 +1,5 @@
-# gstack skills (install separately, too large to bundle)
-.claude/skills/gstack/
+# Claude Code local config (skills, settings, etc.)
+.claude/
 
 # Node
 node_modules/

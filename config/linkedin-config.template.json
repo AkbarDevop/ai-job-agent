@@ -37,5 +37,8 @@
   "eeoVeteran": "No",
   "projectPitch": "YOUR_PROJECT_PITCH",
   "resumePath": "/path/to/your/resume.pdf",
-  "chromeCookiePath": "YOUR_CHROME_COOKIES_PATH"
+  "chromeCookiePath": "YOUR_CHROME_COOKIES_PATH",
+
+  "name": "YOUR_FIRST_NAME YOUR_LAST_NAME",
+  "autoSubmit": false
 }
