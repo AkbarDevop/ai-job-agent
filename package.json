@@ -1,0 +1,38 @@
+{
+  "name": "ai-job-agent",
+  "version": "1.0.0",
+  "description": "AI-powered job application automation — LinkedIn Easy Apply, Greenhouse, Lever, Jobvite, Ashby, Outlook triage, tracking",
+  "private": true,
+  "scripts": {
+    "linkedin": "node scripts/linkedin-easy-apply.js",
+    "greenhouse": "node scripts/greenhouse-apply.js",
+    "lever": "node scripts/lever-apply.js",
+    "jobvite": "node scripts/jobvite-apply.js",
+    "ashby": "node scripts/ashby-apply.js",
+    "triage": "node scripts/outlook-triage.js",
+    "send": "node scripts/outlook-send.js"
+  },
+  "dependencies": {
+    "playwright-core": "^1.40.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Akbarjon Kamoldinov",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AkbarDevop/ai-job-agent"
+  },
+  "keywords": [
+    "job-search",
+    "automation",
+    "linkedin",
+    "playwright",
+    "claude-code",
+    "internship",
+    "ats",
+    "greenhouse",
+    "lever"
+  ]
+}

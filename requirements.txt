@@ -1,0 +1,5 @@
+# Python dependencies for AI Job Agent
+# The core scripts use only Python stdlib (no pip packages required).
+# The LinkedIn cookie import uses browser_cookie3 (optional).
+
+browser_cookie3>=0.19.0    # Optional: import cookies from Chrome/Firefox/Edge
