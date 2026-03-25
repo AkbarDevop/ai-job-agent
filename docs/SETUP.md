@@ -1,0 +1,276 @@
+# Detailed Setup Guide
+
+This guide walks through every step of setting up the AI Job Application Agent toolkit.
+
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Chrome Cookie Setup](#chrome-cookie-setup)
+- [Google Sheets Integration](#google-sheets-integration)
+- [Outlook Email Integration](#outlook-email-integration)
+- [Testing Your Setup](#testing-your-setup)
+- [Troubleshooting](#troubleshooting)
+
+## Prerequisites
+
+### Required
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Node.js | 18+ | Runs Playwright automation scripts |
+| Python | 3.10+ | Runs Google Sheets sync and tracker scripts |
+| npm | 9+ | Package manager (comes with Node.js) |
+| Google Chrome | Latest | Cookie source for LinkedIn authentication |
+
+### Optional
+
+| Tool | Purpose |
+|------|---------|
+| gcloud CLI | Google Sheets API authentication |
+| Claude Code | AI-assisted job hunting with skills |
+
+## Installation
+
+### Option A: Quick Setup (Recommended)
+
+```bash
+git clone https://github.com/AkbarDevop/ai-job-application-agent.git
+cd ai-job-application-agent
+bash setup.sh
+```
+
+The setup script checks prerequisites, installs dependencies, and creates config files from templates.
+
+### Option B: Manual Setup
+
+```bash
+# Clone the repo
+git clone https://github.com/AkbarDevop/ai-job-application-agent.git
+cd ai-job-application-agent
+
+# Install Node.js dependencies
+npm init -y
+npm install playwright-core
+
+# Install Playwright browsers (optional - you can use system Chrome instead)
+npx playwright install chromium
+
+# Install Python dependencies
+pip3 install browser-cookie3
+```
+
+## Configuration
+
+### 1. LinkedIn Config (Required for LinkedIn Easy Apply)
+
+Copy the template and fill in your details:
+
+```bash
+cp config/linkedin-config.template.json config/linkedin-config.json
+```
+
+Edit `config/linkedin-config.json`:
+
+```json
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "email": "jane@university.edu",
+  "phone": "(555) 123-4567",
+  "phoneNational": "5551234567",
+  "location": "Austin, Texas",
+  "resumePath": "/absolute/path/to/your/resume.pdf",
+  "chromeCookiePath": "/path/to/Chrome/Cookies"
+}
+```
+
+See `config/example-config.json` for a complete example.
+
+### 2. Candidate Profile (Required for Agent Handoff)
+
+```bash
+cp config/candidate-profile.template.md config/candidate-profile.md
+```
+
+This file tells Claude Code (or any AI agent) everything about your background, preferences, and application rules. Fill it in thoroughly for best results.
+
+### 3. Answer Bank (Recommended)
+
+```bash
+cp config/answer-bank.template.md config/answer-bank.md
+```
+
+Pre-written answers for common application questions. Saves time when the same question appears across different applications.
+
+### 4. Application Tracker
+
+```bash
+cp templates/tracker.template.csv application-tracker.csv
+```
+
+Local CSV tracker for all your applications.
+
+## Chrome Cookie Setup
+
+The LinkedIn Easy Apply script authenticates by importing cookies from your Chrome browser. This means you need to be logged into LinkedIn in Chrome.
+
+### Finding Your Cookie File
+
+| OS | Default Cookie Path |
+|----|-------------------|
+| macOS | `~/Library/Application Support/Google/Chrome/Default/Cookies` |
+| Linux | `~/.config/google-chrome/Default/Cookies` |
+| Windows | `%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cookies` |
+
+If you use a Chrome profile other than "Default", replace "Default" with your profile name (e.g., "Profile 1").
+
+### Setting the Cookie Path
+
+Add the path to your `config/linkedin-config.json`:
+
+```json
+{
+  "chromeCookiePath": "/Users/you/Library/Application Support/Google/Chrome/Default/Cookies"
+}
+```
+
+Or set the environment variable:
+
+```bash
+export CHROME_COOKIE_PATH="$HOME/Library/Application Support/Google/Chrome/Default/Cookies"
+```
+
+### Troubleshooting Cookies
+
+- **"browser_cookie3 not found"**: Run `pip3 install browser-cookie3`
+- **"Permission denied"**: On macOS, Chrome must be closed when reading cookies, or grant Full Disk Access to Terminal
+- **"Login page instead of application"**: Your LinkedIn session may have expired. Log into LinkedIn in Chrome and try again.
+
+## Google Sheets Integration
+
+### 1. Set Up gcloud
+
+```bash
+# Install gcloud CLI
+# See: https://cloud.google.com/sdk/docs/install
+
+# Authenticate
+gcloud auth application-default login
+```
+
+### 2. Create Your Google Sheet
+
+Create a Google Sheet with these column headers in row 1:
+
+```
+Date | Company | Role | Status | Location | Source | Applied By | URL | Notes | Contact | Compensation | Days Since | Key
+```
+
+### 3. Get Your Sheet ID
+
+The Sheet ID is in the URL:
+```
+https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID_HERE/edit
+```
+
+### 4. Configure
+
+Set environment variables:
+
+```bash
+export SPREADSHEET_ID="your-sheet-id"
+export SHEET_NAME="Job Tracker"
+```
+
+Or edit the defaults at the top of `scripts/google-sheet-sync.py` and `scripts/tracker-status-update.py`.
+
+## Outlook Email Integration
+
+The Outlook scripts connect to a running Chrome instance via Chrome DevTools Protocol.
+
+### 1. Start Chrome with Remote Debugging
+
+```bash
+# macOS
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --remote-debugging-port=9224 \
+  --user-data-dir=/tmp/outlook-chrome-profile
+
+# Linux
+google-chrome --remote-debugging-port=9224 --user-data-dir=/tmp/outlook-chrome-profile
+```
+
+### 2. Navigate to Outlook
+
+Open `https://outlook.office.com` in that Chrome window and sign in.
+
+### 3. Use the Scripts
+
+```bash
+# Search emails
+node scripts/outlook-triage.js search "job application confirmation"
+
+# Read a specific result
+node scripts/outlook-triage.js extract 0
+
+# Mark as read
+node scripts/outlook-triage.js mark-read 0
+```
+
+## Testing Your Setup
+
+### LinkedIn Easy Apply (Dry Run)
+
+Find any LinkedIn job posting URL and run:
+
+```bash
+node scripts/linkedin-easy-apply.js \
+  "https://www.linkedin.com/jobs/view/1234567890" \
+  config/linkedin-config.json
+```
+
+Watch the JSON output. If it reaches `stage: "step"` with filled fields, your setup works.
+
+### Google Sheets Sync
+
+Create a test CSV:
+
+```bash
+echo 'date,company,role,status,location,source,applied_by,url,notes
+2026-01-01,Test Corp,Test Role,submitted,Remote,LinkedIn,Me,https://example.com,test' > /tmp/test-apps.csv
+
+python3 scripts/google-sheet-sync.py /tmp/test-apps.csv
+```
+
+### ATS Scripts (Lever/Greenhouse/Jobvite/Ashby)
+
+These require a job-specific config. See the script headers for the expected JSON format.
+
+```bash
+# Example: Lever dry run (autoSubmit: false)
+echo '{"resumePath": "/path/to/resume.pdf", "name": "Jane Doe", "email": "jane@example.com", "phone": "555-123-4567", "autoSubmit": false}' > /tmp/lever-config.json
+
+node scripts/lever-apply.js "https://jobs.lever.co/company/job-id" /tmp/lever-config.json
+```
+
+## Troubleshooting
+
+### Common Issues
+
+| Problem | Solution |
+|---------|----------|
+| `Cannot find module 'playwright-core'` | Run `npm install playwright-core` |
+| `browser_cookie3` import error | Run `pip3 install browser-cookie3` |
+| LinkedIn shows login page | Log into LinkedIn in Chrome, close Chrome, retry |
+| Captcha blocks submission | Set `HEADLESS=0` and solve manually, or skip the role |
+| Google Sheets 403 error | Run `gcloud auth application-default login` |
+| Outlook scripts fail to connect | Ensure Chrome is running with `--remote-debugging-port=9224` |
+| "No browser contexts" error | Ensure Outlook is open in the Chrome debug instance |
+
+### Getting Help
+
+- Check the script's header comment for usage details
+- Look at `config/example-config.json` for a complete config example
+- Open an issue on GitHub with the full error output
