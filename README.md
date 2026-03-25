@@ -1,7 +1,7 @@
 # AI Job Application Agent
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/AkbarDevop/ai-job-application-agent/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/AkbarDevop/ai-job-agent/pulls)
 [![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-blueviolet)](https://docs.anthropic.com/en/docs/claude-code)
 
 **An AI-powered job application automation toolkit that handles LinkedIn Easy Apply, ATS forms, email outreach, and application tracking -- so you can focus on interview prep instead of filling out forms.**
@@ -31,8 +31,8 @@ All scripts are config-driven. Fill in your profile once, and the tools handle t
 ### 1. Clone and set up
 
 ```bash
-git clone https://github.com/AkbarDevop/ai-job-application-agent.git
-cd ai-job-application-agent
+git clone https://github.com/AkbarDevop/ai-job-agent.git
+cd ai-job-agent
 bash setup.sh
 ```
 

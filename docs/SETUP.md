@@ -36,8 +36,8 @@ This guide walks through every step of setting up the AI Job Application Agent t
 ### Option A: Quick Setup (Recommended)
 
 ```bash
-git clone https://github.com/AkbarDevop/ai-job-application-agent.git
-cd ai-job-application-agent
+git clone https://github.com/AkbarDevop/ai-job-agent.git
+cd ai-job-agent
 bash setup.sh
 ```
 
@@ -47,8 +47,8 @@ The setup script checks prerequisites, installs dependencies, and creates config
 
 ```bash
 # Clone the repo
-git clone https://github.com/AkbarDevop/ai-job-application-agent.git
-cd ai-job-application-agent
+git clone https://github.com/AkbarDevop/ai-job-agent.git
+cd ai-job-agent
 
 # Install Node.js dependencies
 npm init -y

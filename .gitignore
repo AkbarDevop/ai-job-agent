@@ -1,0 +1,27 @@
+# gstack skills (install separately, too large to bundle)
+.claude/skills/gstack/
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Active configs (contain personal info)
+config/candidate-profile.md
+config/answer-bank.md
+config/linkedin-config.json
+
+# Tracker data
+application-tracker.csv
+submitted-applications-*.md
+*.json.bak
+
+# Chrome profiles
+chrome-data/
