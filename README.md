@@ -8,29 +8,29 @@
 
 ## The Story
 
-i'm akbar. an electrical engineering junior at mizzou, from uzbekistan.
+I'm Akbar. An electrical engineering junior at Mizzou, from Uzbekistan.
 
-during the winter 2025 internship season, i was spending 1-2 hours every day filling out the same forms — name, email, school, major, graduation date, resume, work authorization, sponsorship status. over and over. 10-20 applications a day. same information. different portals. i had a half-updated google sheet that was supposed to be my tracker, but half the applications were slipping through the cracks.
+During the winter 2025 internship season, I was spending 1-2 hours every day filling out the same forms — name, email, school, major, graduation date, resume, work authorization, sponsorship status. Over and over. 10-20 applications a day. Same information. Different portals. I had a half-updated Google Sheet that was supposed to be my tracker, but half the applications were slipping through the cracks.
 
-a friend asked me: can't a terminal agent just do this?
+A friend asked me: can't a terminal agent just do this?
 
-so i tried it. i gave claude code access to my resume, my transcript, and my real application data. i told it the truth about my work authorization (f-1 student, uzbek citizen, CPT-eligible, no sponsorship needed now, will need it later). i said: apply to internships for me. log everything. don't lie.
+So I tried it. I gave Claude Code access to my resume, my transcript, and my real application data. I told it the truth about my work authorization (F-1 student, Uzbek citizen, CPT-eligible, no sponsorship needed now, will need it later). I said: apply to internships for me. Log everything. Don't lie.
 
-**it worked.** the agent submitted 200+ real applications across 5 ATS platforms. it split my resume into two variants (software vs. EE) and routed each application to the right one. it tracked everything in a google sheet. it skipped roles that required citizenship. it logged CAPTCHAs honestly as "blocked" instead of pretending it submitted.
+**It worked.** The agent submitted 200+ real applications across 5 ATS platforms. It split my resume into two variants (software vs. EE) and routed each application to the right one. It tracked everything in a Google Sheet. It skipped roles that required citizenship. It logged CAPTCHAs honestly as "blocked" instead of pretending it submitted.
 
-but that was just the beginning.
+But that was just the beginning.
 
-i'm from uzbekistan, and plan B for this summer was going back home and working in the energy/engineering sector there. so i told the agent: research uzbekistan's engineering companies and find me people to reach out to. in one session, it mapped the entire tech and energy ecosystem — siemens energy, masdar, worley, ERIELL, huawei, schneider electric. it found 9 professionals on linkedin, wrote personalized connection notes (some mixing in uzbek), and sent all the requests.
+I'm from Uzbekistan, and Plan B for this summer was going back home and working in the energy/engineering sector there. So I told the agent: research Uzbekistan's engineering companies and find me people to reach out to. In one session, it mapped the entire tech and energy ecosystem — Siemens Energy, Masdar, Worley, ERIELL, Huawei, Schneider Electric. It found 9 professionals on LinkedIn, wrote personalized connection notes (some mixing in Uzbek), and sent all the requests.
 
-next day, i said: check if anyone accepted. the agent opened linkedin, scrolled through my sent invitations, and found that **2 of 8 had already accepted within 24 hours.** one of them — a director at worley — had replied. in uzbek. the agent read the message, translated it, and extracted a direct HR email: `zulfiya.vafaeva@worley.com`. "if you're interested, contact the head of HR."
+Next day, I said: check if anyone accepted. The agent opened LinkedIn, scrolled through my sent invitations, and found that **2 of 8 had already accepted within 24 hours.** One of them — a director at Worley — had replied. In Uzbek. The agent read the message, translated it, and extracted a direct HR email: `zulfiya.vafaeva@worley.com`. "If you're interested, contact the head of HR."
 
-that's not a copilot filling out forms. that's an agent running a job search.
+That's not a copilot filling out forms. That's an agent running a job search.
 
-i still haven't landed an internship yet. maybe it's the rough market for international students, maybe my CV still needs work, maybe it's both. but this toolkit turned a 2-hour daily grind into something that runs while i study.
+I still haven't landed an internship yet. Maybe it's the rough market for international students, maybe my CV still needs work, maybe it's both. But this toolkit turned a 2-hour daily grind into something that runs while I study.
 
-i'm open-sourcing the whole thing because nobody should have to type their graduation date into 200 different text fields.
+I'm open-sourcing the whole thing because nobody should have to type their graduation date into 200 different text fields.
 
-**[akbar.one](https://akbar.one)** | **[@mendurmen](https://x.com/mendurmen)** | **[linkedin](https://linkedin.com/in/akbarjon-kamoldinov)**
+**[akbar.one](https://akbar.one)** | **[@mendurmen](https://x.com/mendurmen)** | **[LinkedIn](https://linkedin.com/in/akbarjon-kamoldinov)**
 
 ---
 
@@ -109,22 +109,22 @@ This isn't a side project with synthetic benchmarks. It was built during an actu
 ### Applications
 - **200+ applications submitted** across LinkedIn Easy Apply, Greenhouse, Lever, Jobvite, and Ashby
 - **5 ATS platforms** fully automated with config-driven form filling
-- **auto-answer engine** handles work authorization, EEO, screening questions, and custom fields
-- applications that hit CAPTCHAs are logged honestly as "blocked" — no fake submissions
-- **two-resume routing**: software/AI roles get one resume, EE/embedded roles get another
+- **Auto-answer engine** handles work authorization, EEO, screening questions, and custom fields
+- Applications that hit CAPTCHAs are logged honestly as "blocked" — no fake submissions
+- **Two-resume routing**: software/AI roles get one resume, EE/embedded roles get another
 
 ### LinkedIn Networking
-- sent personalized connection requests to recruiters at target companies with notes referencing specific roles
-- researched uzbekistan's energy sector, identified 9 professionals, sent personalized requests in under an hour
+- Sent personalized connection requests to recruiters at target companies with notes referencing specific roles
+- Researched Uzbekistan's energy sector, identified 9 professionals, sent personalized requests in under an hour
 - **2 of 8 accepted within 24 hours** — one replied with a direct HR contact email
-- monitors which connections were accepted and sends tailored follow-up DMs
-- full lifecycle: research companies → find people → craft notes → send requests → track acceptances → follow up
+- Monitors which connections were accepted and sends tailored follow-up DMs
+- Full lifecycle: research companies → find people → craft notes → send requests → track acceptances → follow up
 
 ### International Outreach
-- researched uzbekistan's entire tech and engineering ecosystem in a single session
-- produced a comprehensive [research brief](plan-b-uzbekistan-summer-2026.md) covering 8 sectors
-- identified target companies, found linkedin profiles, and initiated outreach — all in one continuous workflow
-- handles multilingual messages (the worley director replied in uzbek — the agent translated it and extracted the lead)
+- Researched Uzbekistan's entire tech and engineering ecosystem in a single session
+- Produced a comprehensive [research brief](plan-b-uzbekistan-summer-2026.md) covering 8 sectors
+- Identified target companies, found LinkedIn profiles, and initiated outreach — all in one continuous workflow
+- Handles multilingual messages (the Worley director replied in Uzbek — the agent translated it and extracted the lead)
 
 ### Multi-Session Continuity
 ```
@@ -198,10 +198,10 @@ All personal details live in config files, not in the scripts:
 
 ```
 config/
-  linkedin-config.json          # your identity, answers, resume path, cookie path
-  candidate-profile.md          # full profile for AI agent handoff
-  answer-bank.md                # reusable answers for common questions
-  example-config.json           # reference example with all fields
+  linkedin-config.json          # Your identity, answers, resume path, cookie path
+  candidate-profile.md          # Full profile for AI agent handoff
+  answer-bank.md                # Reusable answers for common questions
+  example-config.json           # Reference example with all fields
 ```
 
 If you used `wizard.sh`, these are already generated for you.
@@ -279,48 +279,48 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 
 The toolkit is designed to be adapted:
 
-- **different countries**: update phone format, work authorization rules, currency
-- **different roles**: create resume variants, customize auto-answer patterns
-- **different ATS platforms**: add new scripts following the existing pattern
-- **different email providers**: adapt the Outlook scripts for Gmail or others
-- **different trackers**: swap Google Sheets for Notion, Airtable, etc.
+- **Different countries**: Update phone format, work authorization rules, currency
+- **Different roles**: Create resume variants, customize auto-answer patterns
+- **Different ATS platforms**: Add new scripts following the existing pattern
+- **Different email providers**: Adapt the Outlook scripts for Gmail or others
+- **Different trackers**: Swap Google Sheets for Notion, Airtable, etc.
 
 See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) for the full guide.
 
 ## FAQ
 
 **Q: is this legal?**
-A: this toolkit fills out forms with your real information — the same thing you'd do manually. it does not scrape private data, bypass security measures, or violate terms of service beyond the gray area of browser automation. use responsibly.
+A: This toolkit fills out forms with your real information — the same thing you'd do manually. It does not scrape private data, bypass security measures, or violate terms of service beyond the gray area of browser automation. Use responsibly.
 
 **Q: will LinkedIn ban my account?**
-A: the LinkedIn script uses your real cookies and behaves like a normal user (no parallel requests, no scraping). the risk is comparable to using a browser extension. that said, any automation carries some risk. use at your own discretion.
+A: The LinkedIn script uses your real cookies and behaves like a normal user (no parallel requests, no scraping). The risk is comparable to using a browser extension. That said, any automation carries some risk. Use at your own discretion.
 
 **Q: how does it handle CAPTCHAs?**
-A: invisible CAPTCHAs are sometimes solved automatically. visible CAPTCHAs require manual solving (run with `HEADLESS=0`). applications blocked by CAPTCHAs are logged honestly as "blocked" — never as "submitted".
+A: Invisible CAPTCHAs are sometimes solved automatically. Visible CAPTCHAs require manual solving (run with `HEADLESS=0`). Applications blocked by CAPTCHAs are logged honestly as "blocked" — never as "submitted".
 
 **Q: can it work without Claude Code?**
-A: yes. the scripts are standalone Node.js and Python programs. Claude Code and its skills are optional enhancements that add AI-assisted search, resume tailoring, and conversational control.
+A: Yes. The scripts are standalone Node.js and Python programs. Claude Code and its skills are optional enhancements that add AI-assisted search, resume tailoring, and conversational control.
 
 **Q: what data leaves my machine?**
-A: application data goes to the job platforms you apply to (LinkedIn, Greenhouse, etc.) and optionally to your Google Sheet. nothing is sent to third-party analytics, tracking, or AI services beyond what you explicitly configure.
+A: Application data goes to the job platforms you apply to (LinkedIn, Greenhouse, etc.) and optionally to your Google Sheet. Nothing is sent to third-party analytics, tracking, or AI services beyond what you explicitly configure.
 
 **Q: i'm not in the US — will this work for me?**
-A: yes. the config is designed to be adapted for any country. update phone format, work authorization fields, and currency. see [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md). the toolkit has already been used for international outreach across uzbekistan, UAE, and central asia.
+A: Yes. The config is designed to be adapted for any country. Update phone format, work authorization fields, and currency. See [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md). The toolkit has already been used for international outreach across Uzbekistan, UAE, and Central Asia.
 
 ## Contributing
 
 Contributions are welcome. Here are some good first issues:
 
-- add support for a new ATS platform (Workday, iCIMS, SuccessFactors)
-- add Gmail support to the email triage scripts
-- add Notion/Airtable tracker integrations
-- improve the auto-answer engine with more question patterns
-- add tests for the form-filling logic
-- add a web UI for config management
-- add LinkedIn recruiter search automation (find recruiters at target companies)
-- add connection acceptance tracking dashboard
-- add support for other languages in outreach messages
-- add market research templates for other countries/regions
+- Add support for a new ATS platform (Workday, iCIMS, SuccessFactors)
+- Add Gmail support to the email triage scripts
+- Add Notion/Airtable tracker integrations
+- Improve the auto-answer engine with more question patterns
+- Add tests for the form-filling logic
+- Add a web UI for config management
+- Add LinkedIn recruiter search automation (find recruiters at target companies)
+- Add connection acceptance tracking dashboard
+- Add support for other languages in outreach messages
+- Add market research templates for other countries/regions
 
 Please open an issue before starting significant work so we can discuss the approach.
 
