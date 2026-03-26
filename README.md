@@ -4,13 +4,9 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/AkbarDevop/ai-job-agent/pulls)
 [![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-blueviolet)](https://docs.anthropic.com/en/docs/claude-code)
 
-> "butun kompga access bering. keyin nafas olasiz faqat."
-> ("give it access to the whole machine, then just breathe.")
-> — a friend, after watching the agent apply to 30 jobs in one sitting
-
 ---
 
-## the story
+## The Story
 
 i'm akbar. an electrical engineering junior at mizzou, from uzbekistan.
 
@@ -38,7 +34,7 @@ i'm open-sourcing the whole thing because nobody should have to type their gradu
 
 ---
 
-## what this does
+## What This Does
 
 | Capability | What It Automates |
 |-----------|------------------|
@@ -55,9 +51,9 @@ i'm open-sourcing the whole thing because nobody should have to type their gradu
 
 ---
 
-## get started in 5 minutes
+## Get Started in 5 Minutes
 
-### option 1: interactive wizard (recommended)
+### Option 1: Interactive Wizard (recommended)
 
 ```bash
 git clone https://github.com/AkbarDevop/ai-job-agent.git
@@ -65,7 +61,7 @@ cd ai-job-agent
 bash wizard.sh
 ```
 
-the wizard walks you through everything step by step:
+The wizard walks you through everything step by step:
 
 ```
 Step 1 of 6: The Basics      → name, email, phone, location
@@ -76,9 +72,9 @@ Step 5 of 6: Resume           → point to your PDF (drag & drop into terminal)
 Step 6 of 6: Chrome Cookies   → auto-detects your Chrome cookie path
 ```
 
-at the end, your config files are generated automatically. no JSON editing required.
+At the end, your config files are generated automatically. No JSON editing required.
 
-### option 2: manual setup
+### Option 2: Manual Setup
 
 ```bash
 git clone https://github.com/AkbarDevop/ai-job-agent.git
@@ -91,7 +87,7 @@ cp config/candidate-profile.template.md config/candidate-profile.md
 $EDITOR config/linkedin-config.json
 ```
 
-### apply to your first job
+### Apply to Your First Job
 
 ```bash
 # dry run — fills the form but does NOT submit
@@ -102,35 +98,35 @@ node scripts/linkedin-easy-apply.js \
 # when ready, set "autoSubmit": true in your config
 ```
 
-each script outputs structured JSON so it can be piped to other tools or consumed by an AI agent.
+Each script outputs structured JSON so it can be piped to other tools or consumed by an AI agent.
 
 ---
 
-## real results
+## Real Results
 
-this isn't a side project with synthetic benchmarks. it was built during an actual job search, refined across 200+ real applications.
+This isn't a side project with synthetic benchmarks. It was built during an actual job search, refined across 200+ real applications.
 
-### applications
+### Applications
 - **200+ applications submitted** across LinkedIn Easy Apply, Greenhouse, Lever, Jobvite, and Ashby
 - **5 ATS platforms** fully automated with config-driven form filling
 - **auto-answer engine** handles work authorization, EEO, screening questions, and custom fields
 - applications that hit CAPTCHAs are logged honestly as "blocked" — no fake submissions
 - **two-resume routing**: software/AI roles get one resume, EE/embedded roles get another
 
-### linkedin networking
+### LinkedIn Networking
 - sent personalized connection requests to recruiters at target companies with notes referencing specific roles
 - researched uzbekistan's energy sector, identified 9 professionals, sent personalized requests in under an hour
 - **2 of 8 accepted within 24 hours** — one replied with a direct HR contact email
 - monitors which connections were accepted and sends tailored follow-up DMs
 - full lifecycle: research companies → find people → craft notes → send requests → track acceptances → follow up
 
-### international outreach
+### International Outreach
 - researched uzbekistan's entire tech and engineering ecosystem in a single session
 - produced a comprehensive [research brief](plan-b-uzbekistan-summer-2026.md) covering 8 sectors
 - identified target companies, found linkedin profiles, and initiated outreach — all in one continuous workflow
 - handles multilingual messages (the worley director replied in uzbek — the agent translated it and extracted the lead)
 
-### multi-session continuity
+### Multi-Session Continuity
 ```
 Session 1: agent reads profile → applies to 30 jobs → updates tracker
 Session 2: agent reads profile → continues from where Session 1 stopped
@@ -138,11 +134,11 @@ Session 3: agent researches international market → sends LinkedIn outreach
 Session 4: agent checks for acceptances → reads uzbek reply → extracts HR email
 ```
 
-the agent handoff system means you never re-explain context. every session picks up exactly where the last one left off.
+The agent handoff system means you never re-explain context. Every session picks up exactly where the last one left off.
 
 ---
 
-## architecture
+## Architecture
 
 ```
                     +------------------+
@@ -184,7 +180,7 @@ the agent handoff system means you never re-explain context. every session picks
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical breakdown.
 
-## supported platforms
+## Supported Platforms
 
 | Platform | Method | Auth | Captcha Handling |
 |----------|--------|------|-----------------|
@@ -196,9 +192,9 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical breakdow
 | Outlook Web | CDP to running Chrome | Manual login | N/A |
 | LinkedIn Networking | Cookie import from Chrome | Automatic | N/A (profile pages) |
 
-## configuration
+## Configuration
 
-all personal details live in config files, not in the scripts:
+All personal details live in config files, not in the scripts:
 
 ```
 config/
@@ -208,9 +204,9 @@ config/
   example-config.json           # reference example with all fields
 ```
 
-if you used `wizard.sh`, these are already generated for you.
+If you used `wizard.sh`, these are already generated for you.
 
-if you want to set up manually, start from the templates:
+If you want to set up manually, start from the templates:
 
 ```bash
 cp config/linkedin-config.template.json config/linkedin-config.json
@@ -220,11 +216,11 @@ cp config/answer-bank.template.md config/answer-bank.md
 
 See [docs/SETUP.md](docs/SETUP.md) for a detailed walkthrough.
 
-## claude code skills
+## Claude Code Skills
 
-this toolkit becomes significantly more powerful when paired with [Claude Code](https://docs.anthropic.com/en/docs/claude-code). community-built skills add AI-assisted job search, resume tailoring, interview prep, and more.
+This toolkit becomes significantly more powerful when paired with [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Community-built skills add AI-assisted job search, resume tailoring, interview prep, and more.
 
-**highlights**:
+**Highlights**:
 
 - `/job-search` — search for jobs matching your resume across multiple boards
 - `/tailor-resume` — customize your resume for a specific job posting
@@ -235,15 +231,15 @@ this toolkit becomes significantly more powerful when paired with [Claude Code](
 
 See [skills/README.md](skills/README.md) for the full list of 27+ recommended skills with install commands.
 
-## agent handoff
+## Agent Handoff
 
-the `config/candidate-profile.md` file enables multi-session continuity with AI agents. it contains your identity, application rules, search preferences, tracking locations, and session state.
+The `config/candidate-profile.md` file enables multi-session continuity with AI agents. It contains your identity, application rules, search preferences, tracking locations, and session state.
 
-when a new claude code session starts, the agent reads this file and picks up exactly where the last session left off. this turns an AI assistant into a persistent job search agent.
+When a new Claude Code session starts, the agent reads this file and picks up exactly where the last session left off. This turns an AI assistant into a persistent job search agent.
 
-**real example**: in one session, the agent researched uzbekistan's engineering sector, identified 9 professionals at companies like siemens energy, masdar, worley, and ERIELL, crafted personalized connection notes (some in uzbek), and sent all requests. the next session, it checked for acceptances, found 2 new connections, read a reply written in uzbek, translated it, and extracted a direct HR email — all without re-explaining any context.
+**Real example**: In one session, the agent researched Uzbekistan's engineering sector, identified 9 professionals at companies like Siemens Energy, Masdar, Worley, and ERIELL, crafted personalized connection notes (some in Uzbek), and sent all requests. The next session, it checked for acceptances, found 2 new connections, read a reply written in Uzbek, translated it, and extracted a direct HR email — all without re-explaining any context.
 
-## project structure
+## Project Structure
 
 ```
 .
@@ -279,9 +275,9 @@ when a new claude code session starts, the agent reads this file and picks up ex
     +-- ARCHITECTURE.md                # System design and data flow
 ```
 
-## customization
+## Customization
 
-the toolkit is designed to be adapted:
+The toolkit is designed to be adapted:
 
 - **different countries**: update phone format, work authorization rules, currency
 - **different roles**: create resume variants, customize auto-answer patterns
@@ -311,9 +307,9 @@ A: application data goes to the job platforms you apply to (LinkedIn, Greenhouse
 **Q: i'm not in the US — will this work for me?**
 A: yes. the config is designed to be adapted for any country. update phone format, work authorization fields, and currency. see [docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md). the toolkit has already been used for international outreach across uzbekistan, UAE, and central asia.
 
-## contributing
+## Contributing
 
-contributions are welcome. here are some good first issues:
+Contributions are welcome. Here are some good first issues:
 
 - add support for a new ATS platform (Workday, iCIMS, SuccessFactors)
 - add Gmail support to the email triage scripts
@@ -326,15 +322,15 @@ contributions are welcome. here are some good first issues:
 - add support for other languages in outreach messages
 - add market research templates for other countries/regions
 
-please open an issue before starting significant work so we can discuss the approach.
+Please open an issue before starting significant work so we can discuss the approach.
 
-## credits
+## Credits
 
-built by [akbar](https://akbar.one) during a real job search. refined across 200+ actual applications using [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+Built by [Akbar](https://akbar.one) during a real job search. Refined across 200+ actual applications using [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
-this toolkit reflects the patterns that emerged from automating a job search at scale: cookie-based authentication, pattern-matching auto-answers, config-driven form filling, multi-platform tracking, LinkedIn networking automation, international market research, multilingual outreach, and agent handoff for session continuity.
+This toolkit reflects the patterns that emerged from automating a job search at scale: cookie-based authentication, pattern-matching auto-answers, config-driven form filling, multi-platform tracking, LinkedIn networking automation, international market research, multilingual outreach, and agent handoff for session continuity.
 
-fork it. improve it. make it yours. and if you land an internship with it, [let me know](https://x.com/mendurmen).
+Fork it. Improve it. Make it yours. And if you land an internship with it, [let me know](https://x.com/mendurmen).
 
 ## License
 
