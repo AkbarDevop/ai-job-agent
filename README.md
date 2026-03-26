@@ -4,7 +4,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/AkbarDevop/ai-job-agent/pulls)
 [![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-blueviolet)](https://docs.anthropic.com/en/docs/claude-code)
 
-**An AI-powered job application automation toolkit that handles LinkedIn Easy Apply, ATS forms, email outreach, and application tracking -- so you can focus on interview prep instead of filling out forms.**
+**An AI-powered job application automation toolkit that handles LinkedIn Easy Apply, ATS forms, recruiter outreach, LinkedIn networking, international job market research, and application tracking -- so you can focus on interview prep instead of filling out forms.**
 
 ---
 
@@ -23,6 +23,9 @@ This toolkit automates the most repetitive parts of a job search:
 | **Outlook Send** | Composes and sends emails (e.g., recruiter outreach) via Outlook Web |
 | **Google Sheet Sync** | Appends applications to a Google Sheet tracker from a local CSV |
 | **Tracker Status Update** | Batch-updates application statuses across Google Sheets and local CSV |
+| **LinkedIn Networking** | Sends personalized connection requests to recruiters and professionals at target companies |
+| **Recruiter Follow-up** | Monitors connection acceptances and sends tailored follow-up DMs to new connections |
+| **Market Research** | Researches international job markets, identifies target companies, and finds the right people to contact |
 
 All scripts are config-driven. Fill in your profile once, and the tools handle the rest.
 
@@ -65,6 +68,32 @@ node scripts/greenhouse-apply.js \
 
 Each script outputs structured JSON to stdout so it can be piped to other tools or consumed by an AI agent.
 
+## Real Results
+
+This toolkit was built and tested during a real job search. Here's what it achieved:
+
+### Application Automation
+- **200+ applications submitted** across LinkedIn Easy Apply, Greenhouse, Lever, Jobvite, and Ashby
+- **5 ATS platforms** fully automated with config-driven form filling
+- **Auto-answer engine** handles work authorization, EEO, screening questions, and custom fields
+- Applications that hit CAPTCHAs are logged honestly as "blocked" -- no fake submissions
+
+### LinkedIn Networking & Outreach
+- **Automated recruiter outreach**: sent personalized connection requests to recruiters at target companies with context-aware notes referencing specific roles
+- **International networking**: researched companies in Uzbekistan's energy/engineering sector, identified 9 key professionals, and sent personalized connection requests in under an hour
+- **2 of 8 connections accepted within 24 hours** -- one replied with a direct HR contact and email for the hiring manager
+- **Follow-up messaging**: monitors which connections were accepted and sends tailored follow-up DMs automatically
+- The agent handles the full lifecycle: research companies -> find people -> craft personalized notes -> send requests -> track acceptances -> send follow-ups
+
+### International Job Market Research
+- **AI-powered market research**: the agent researched Uzbekistan's entire tech and engineering ecosystem in a single session -- startups, government initiatives, accelerators, conferences, university research labs, remote work infrastructure
+- Produced a comprehensive [research brief](plan-b-uzbekistan-summer-2026.md) covering 8 sectors with actionable next steps
+- Identified target companies, found LinkedIn profiles of key contacts, and initiated outreach -- all in one continuous workflow
+
+### Multi-Session Continuity
+- The agent handoff system (`candidate-profile.md`) lets Claude Code pick up exactly where the last session left off
+- Real example: Session 1 researched companies and sent connection requests. Session 2 (next day) checked for acceptances, found 2 new connections, read a reply in Uzbek, translated it, and extracted an HR contact -- all without re-explaining context
+
 ## Architecture
 
 ```
@@ -74,32 +103,35 @@ Each script outputs structured JSON to stdout so it can be piped to other tools 
                     | LinkedIn search  |
                     +--------+---------+
                              |
-                             v
-               +-------------+--------------+
-               |     Application Router     |
-               |  (Claude Code / manual)    |
-               +----+----+----+----+-------+
-                    |    |    |    |
-         +----------+   |    |    +----------+
-         v              v    v               v
-   +-----------+ +--------+ +--------+ +-----------+
-   | LinkedIn  | | Lever  | | Green- | | Jobvite / |
-   | Easy Apply| | Apply  | | house  | | Ashby     |
-   +-----------+ +--------+ +--------+ +-----------+
-         |           |          |            |
-         +-----+-----+----+----+------------+
-               |           |
-               v           v
-         +----------+ +-----------+
-         | Local CSV| | Google    |
-         | Tracker  | | Sheets    |
-         +----------+ +-----------+
-               |
-               v
-         +-----------+
-         | Outlook   |
-         | Triage    |
-         +-----------+
+                +------------+------------+
+                |                         |
+                v                         v
+  +-------------+--------------+  +------+--------+
+  |     Application Router     |  |   Networking   |
+  |  (Claude Code / manual)    |  |    Engine      |
+  +----+----+----+----+-------+  +--+----+----+--+
+       |    |    |    |            |    |       |
+  +----+    |    |    +----+       |    |       |
+  v         v    v         v       v    v       v
++------+ +-----+ +------+ +-----+ +------+ +--------+
+|Linke-| |Lever| |Green-| |Jobv-| |Conn  | |Follow- |
+|din   | |Apply| |house | |ite/ | |Reqs  | |up DMs  |
+|Easy  | |     | |      | |Ashby| |      | |        |
++------+ +-----+ +------+ +-----+ +------+ +--------+
+  |        |        |        |       |          |
+  +----+---+---+----+--------+       +----+-----+
+       |       |                          |
+       v       v                          v
+ +----------+ +-----------+    +------------------+
+ | Local CSV| | Google    |    | Market Research  |
+ | Tracker  | | Sheets    |    | & Intl Outreach  |
+ +----------+ +-----------+    +------------------+
+       |
+       v
+ +-----------+
+ | Outlook   |
+ | Triage    |
+ +-----------+
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical breakdown.
@@ -114,6 +146,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical breakdow
 | Jobvite | CDP or headless launch | None needed | reCAPTCHA detection |
 | Ashby | CDP or headless launch | None needed | reCAPTCHA detection |
 | Outlook Web | CDP to running Chrome | Manual login | N/A |
+| LinkedIn Networking | Cookie import from Chrome | Automatic | N/A (profile pages) |
 
 ## Configuration
 
@@ -161,8 +194,11 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 ```
 Session 1: Agent reads profile --> applies to 30 jobs --> updates profile
 Session 2: Agent reads profile --> continues from where Session 1 stopped
-Session 3: ...
+Session 3: Agent researches international market --> sends LinkedIn outreach
+Session 4: Agent checks for acceptances --> sends follow-up DMs --> extracts leads
 ```
+
+**Real example**: In one session, the agent researched Uzbekistan's engineering sector, identified 9 professionals at companies like Siemens Energy, Masdar, Worley, and ERIELL, crafted personalized connection notes (some in Uzbek), and sent all requests. The next session, it checked for acceptances, found 2 new connections, read a reply written in Uzbek, translated it, and extracted a direct HR email -- all without re-explaining any context.
 
 ## Project Structure
 
@@ -241,14 +277,18 @@ Contributions are welcome. Here are some good first issues:
 - Improve the auto-answer engine with more question patterns
 - Add tests for the form-filling logic
 - Add a web UI for config management
+- Add LinkedIn recruiter search automation (find recruiters at target companies)
+- Add connection acceptance tracking dashboard
+- Add support for other languages in outreach messages
+- Add market research templates for other countries/regions
 
 Please open an issue before starting significant work so we can discuss the approach.
 
 ## Credits
 
-Created by [Akbarjon Kamoldinov](https://github.com/AkbarDevop) as part of a real job search. Built and refined across hundreds of actual job applications using [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+Created by [Akbarjon Kamoldinov](https://github.com/AkbarDevop) as part of a real job search. Built and refined across 200+ actual job applications using [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
-This toolkit reflects the real-world patterns that emerged from automating a job search at scale: cookie-based authentication, pattern-matching auto-answers, config-driven form filling, multi-platform tracking, and agent handoff for session continuity.
+This toolkit reflects the real-world patterns that emerged from automating a job search at scale: cookie-based authentication, pattern-matching auto-answers, config-driven form filling, multi-platform tracking, LinkedIn networking automation, international market research, multilingual outreach, and agent handoff for session continuity.
 
 ## License
 
