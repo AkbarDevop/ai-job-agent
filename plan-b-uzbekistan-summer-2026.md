@@ -1,6 +1,6 @@
-# Plan B: Summer 2026 in Uzbekistan
+# Uzbekistan Tech & Engineering Ecosystem Guide 2026
 
-A comprehensive research brief for an EE junior from Mizzou (from Uzbekistan) with AI/ML, signal processing, and startup experience.
+A comprehensive research brief for international students and engineers interested in Uzbekistan's tech sector, with focus on AI/ML, engineering, and startup opportunities.
 
 ---
 
@@ -32,7 +32,7 @@ Uzbekistan's tech ecosystem is booming. In 2025, the country entered StartupBlin
 
 ---
 
-## 2. Tech Companies Hiring in Tashkent (Beyond NazarX)
+## 2. Tech Companies Hiring in Tashkent
 
 ### Global Companies with Tashkent Offices
 | Company | What they do | Notes |
@@ -82,7 +82,7 @@ Uzbekistan's tech ecosystem is booming. In 2025, the country entered StartupBlin
 | **President AI Award** | Annual competition starting 2026, $1M prize fund for best AI startups |
 | **Goal: Top 50 AI nations by 2030** | Presidential mandate |
 
-### IT Park Tax Benefits (for your own startup)
+### IT Park Tax Benefits (for startups)
 - **Zero corporate income tax** until 2040
 - **Zero personal income tax** on IT Park salary
 - **Zero VAT** on services
@@ -109,14 +109,14 @@ Uzbekistan has a growing remote work infrastructure. Key platforms listing Uzbek
 ### Key Considerations
 - **Time zone:** Tashkent is UTC+5 (11-14 hours ahead of US Pacific/Eastern). Overlap with US East Coast: ~6-9 AM Tashkent = evening US ET. This makes async work or early-morning sync calls viable
 - **Tax:** Self-employed in IT Park-registered entity = tax exempt. Otherwise, check freelancer self-employment regulations (67 exempt professions since 2020)
-- **Internet:** Improving rapidly under Digital Uzbekistan 2030 but verify speeds at your specific location
+- **Internet:** Improving rapidly under Digital Uzbekistan 2030 but verify speeds at the specific location
 - **Payment:** Wise, Payoneer, PayPal (limited), crypto via Telegram Wallet (launched in UZ)
 
 ---
 
 ## 5. Teaching & Training Opportunities
 
-### Where You Could Teach AI/Coding Workshops
+### Where to Teach AI/Coding Workshops
 
 | Venue | Why it works |
 |-------|-------------|
@@ -128,13 +128,6 @@ Uzbekistan has a growing remote work infrastructure. Key platforms listing Uzbek
 | **IT Park University (ITPU)** | Teaching assistantships possible |
 | **"Five Million AI Prompters" initiative** | Government is actively recruiting AI trainers. 100 teachers get $1K bonuses for best results |
 
-### Your Unique Teaching Angle
-With your background (US university EE student + AI/ML + hackathon wins + open-source tools + Telegram following), you could:
-1. **Workshop series on "AI for Engineers"** at IT Park — depth cameras, CNN models, image processing
-2. **Hackathon mentoring/organizing** — bring TigerHacks experience to Tashkent
-3. **Telegram-based course** — leverage @akbardaily audience to build a paid community teaching AI automation
-4. **Guest lectures** at universities (Turin Polytechnic, WIUT, Inha, New Uzbekistan University)
-
 ---
 
 ## 6. Freelancing & Building a Product
@@ -144,16 +137,16 @@ With your background (US university EE student + AI/ML + hackathon wins + open-s
 - Platforms: Upwork, Freelancer, Fiverr, Toptal all have Uzbekistan presence
 - In-demand: web dev, AI/ML, Python, data science, automation
 
-### Product Ideas Matched to Your Skills
-| Idea | Why it fits | Market signal |
-|------|-----------|--------------|
-| **AI automation tools for Uzbek businesses** | Your job-application agent shows the skillset. Localize for Uzbek SMBs | SaaS appointment booking systems already selling to local salons, clinics |
-| **Telegram bot for local services** | Telegram has 20M MAU in Uzbekistan (88% of internet users). Bots are the local app store | Yandex Ads monetization available for channels with 1,500+ subs |
-| **Computer vision for agriculture/retail** | Your depth camera + CNN experience. AgriTech is a key IT Park Ventures focus area | TASS VISION already doing retail CV; agriculture is underserved |
-| **EdTech platform in Uzbek** | Government spending $100M on AI education. Course content needed | Mohirdev proves the model works |
-| **AI-powered content tools for Telegram creators** | Combining your channel experience + AI skills | Creator economy is exploding in UZ |
+### Product Ideas for the Uzbek Market
+| Idea | Market signal |
+|------|--------------|
+| **AI automation tools for Uzbek businesses** | SaaS appointment booking systems already selling to local salons, clinics |
+| **Telegram bot for local services** | Telegram has 20M MAU in Uzbekistan (88% of internet users). Bots are the local app store. Yandex Ads monetization available for channels with 1,500+ subs |
+| **Computer vision for agriculture/retail** | AgriTech is a key IT Park Ventures focus area. TASS VISION already doing retail CV; agriculture is underserved |
+| **EdTech platform in Uzbek** | Government spending $100M on AI education. Course content needed. Mohirdev proves the model works |
+| **AI-powered content tools for Telegram creators** | Creator economy is exploding in UZ |
 
-### Monetizing @akbardaily
+### Telegram Channel Monetization
 - Telegram monetization for channels with 1,000+ subs: 50% ad revenue share
 - Yandex Ads partnership (UZ-specific): monetization from 1,500+ subs
 - Telegram Stars for selling digital goods
@@ -174,7 +167,7 @@ With your background (US university EE student + AI/ML + hackathon wins + open-s
 - **Website:** [turin.uz](https://turin.uz/)
 - Programs: Mechanical & Aerospace Engineering, ICT, Civil Engineering
 - Double degree with Politecnico di Torino (Italy)
-- **Relevance:** Your NazarX aerospace background + EE could align with their Mechanical/Aerospace program faculty for a summer research collaboration
+- **Relevance:** Engineering students could align with their Mechanical/Aerospace program faculty for summer research collaborations
 
 ### Westminster International University in Tashkent (WIUT)
 - UK-accredited programs
@@ -186,7 +179,7 @@ With your background (US university EE student + AI/ML + hackathon wins + open-s
 - Branch of prestigious South Korean university
 - Engineering + technology programs
 - **Hosted the FIRST Regional Cybersecurity Symposium 2026** — shows active research engagement
-- Faculty may be open to summer research collaborations, especially with a US university student
+- Faculty may be open to summer research collaborations, especially with international university students
 
 ### New Uzbekistan University (NewUU)
 - **Website:** [newuu.uz](https://newuu.uz/)
@@ -195,7 +188,7 @@ With your background (US university EE student + AI/ML + hackathon wins + open-s
 - B.Sc. in AI & Robotics, M.Sc. in AI & Machine Learning
 - **Institute of Fundamental and Applied Research** has dedicated AI lab: [ifar.uz](https://www.ifar.uz/new/lab_ai.html)
 - HPC center (10 PFLOPS) + 8PB data warehouse being built
-- **Action:** Cold-email professors in the AI/ML department. Your Mizzou affiliation + CV/ML experience + open-source work is exactly what they want
+- **Action:** Cold-email professors in the AI/ML department. International university affiliations + CV/ML experience + open-source work are strong differentiators
 
 ### Urgench State University
 - Active **NSF-funded US-Uzbekistan research collaboration** with Cal State Fullerton
@@ -210,7 +203,7 @@ With your background (US university EE student + AI/ML + hackathon wins + open-s
 | Event | Date | Location | Details |
 |-------|------|----------|---------|
 | **Global Tech Weekend Tashkent** | May 15-17, 2026 | Tashkent (citywide) | 100+ speakers, startups, investors, workshops. Web3, AI, FinTech, AgriTech. [gtwt.uz](https://gtwt.uz/) |
-| **Space Technology Conference - Central Eurasia** | Mar 30-Apr 1, 2026 | Tashkent, Intercontinental Hotel | Space agencies, satellite operators. Matches your NazarX aerospace background. [spacetechnologyconference.com](https://www.spacetechnologyconference.com/) |
+| **Space Technology Conference - Central Eurasia** | Mar 30-Apr 1, 2026 | Tashkent, Intercontinental Hotel | Space agencies, satellite operators, aerospace engineering. [spacetechnologyconference.com](https://www.spacetechnologyconference.com/) |
 | **Cyber Security Summit Central Eurasia (CSS 2026)** | October 2026 | Tashkent | National Cybersecurity Centre of Uzbekistan. [cybersecuritycentraleurasia.com](https://www.cybersecuritycentraleurasia.com/) |
 | **ICT Week Uzbekistan** | ~September 2026 (TBD) | Tashkent | 20K+ attendees in 2025, 300+ startups, 50+ countries. The biggest annual tech event |
 | **FIRST Regional Symposium** | Already happened Feb 2026 | Tashkent (Inha University) | Cybersecurity, 250 participants |
@@ -222,19 +215,19 @@ With your background (US university EE student + AI/ML + hackathon wins + open-s
 ## Top 5 Actionable Moves (Ranked by Impact)
 
 ### 1. Apply to Plug and Play Uzbekistan Batch 5
-Build an AI product (even a rough MVP) before summer. Apply to the next Plug and Play cohort. You get Silicon Valley-tier mentorship, investor access, and IT Park backing — all in Tashkent. Your open-source job agent + AI skills make you a strong candidate.
+Build an AI product (even a rough MVP) before summer. Apply to the next Plug and Play cohort. This offers Silicon Valley-tier mentorship, investor access, and IT Park backing — all in Tashkent. Strong AI/ML skills and a working prototype make for a competitive application.
 
 ### 2. Cold-Email New Uzbekistan University AI Lab
-Their AI cluster is brand new, backed by the president, partnered with MIT/TUM. A US EE student with CV/ML experience wanting to do summer research is exactly their target. Contact the [Institute of Fundamental and Applied Research](https://www.ifar.uz/new/lab_ai.html).
+Their AI cluster is brand new, backed by the president, partnered with MIT/TUM. International students and engineers with CV/ML experience wanting to do summer research are exactly their target. Contact the [Institute of Fundamental and Applied Research](https://www.ifar.uz/new/lab_ai.html).
 
 ### 3. Register at IT Park + Build in Public
-Register a legal entity as an IT Park member (tax-free until 2040). Build an AI product targeting Uzbek market (Telegram bots, CV for retail/agriculture, EdTech). Document everything on @akbardaily. Apply to IT Park Ventures for seed funding ($10K-$150K).
+Register a legal entity as an IT Park member (tax-free until 2040). Build an AI product targeting the Uzbek market (Telegram bots, CV for retail/agriculture, EdTech). Apply to IT Park Ventures for seed funding ($10K-$150K).
 
 ### 4. Attend Global Tech Weekend (May 15-17)
-Network with founders, investors, and tech professionals. Speaker applications may still be open. Your hackathon + AI background could get you a workshop slot.
+Network with founders, investors, and tech professionals. Speaker applications may still be open. Engineers with hands-on AI experience can often secure workshop or speaking slots.
 
 ### 5. Teach AI Workshops at IT Park
-The government is spending $100M on AI education and needs trainers. Your US university background + hands-on AI experience + English fluency is rare in Uzbekistan. Propose a workshop series on practical AI/ML (Python, CNNs, computer vision) to IT Park's education team.
+The government is spending $100M on AI education and needs trainers. International university backgrounds combined with hands-on AI experience and English fluency are rare in Uzbekistan. Propose a workshop series on practical AI/ML (Python, CNNs, computer vision) to IT Park's education team.
 
 ---
 
