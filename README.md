@@ -122,7 +122,7 @@ This isn't a side project with synthetic benchmarks. It was built during an actu
 
 ### International Outreach
 - Researched Uzbekistan's entire tech and engineering ecosystem in a single session
-- Produced a comprehensive [research brief](plan-b-uzbekistan-summer-2026.md) covering 8 sectors
+- Produced a comprehensive [research brief](uzbekistan-tech-ecosystem-guide-2026.md) covering 8 sectors
 - Identified target companies, found LinkedIn profiles, and initiated outreach — all in one continuous workflow
 - Handles multilingual messages (the Worley director replied in Uzbek — the agent translated it and extracted the lead)
 
