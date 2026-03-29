@@ -57,10 +57,55 @@ Uzbekistan's tech ecosystem is booming. In 2025, the country entered StartupBlin
 - LinkedIn (filter Tashkent)
 - Telegram job channels (very active in UZ)
 
+#### Key Telegram Channels
+- **@uzbekdevs** — Developer community
+- **@itparkuz** — IT Park official channel
+- **@techuzb** — Tech news
+
+> **Important:** Telegram has 20M+ MAU in Uzbekistan (88% of internet users). Many job openings are posted **only** on Telegram, not on traditional job boards. If you are not monitoring Telegram channels, you are missing a large portion of the market.
+
 ### Internship Programs
 - **TUIT (Tashkent University of Information Technologies)** — Digital Education Technologies Development Center accepts interns in AI, Data Science, ML, Web Dev, Mobile Dev
 - **YPIP (Young Professional Internships Program)** by American Councils — summer internships at SMBs in Uzbekistan for STEM students ([uzbekistan.americancouncils.org/ypi-en](https://uzbekistan.americancouncils.org/ypi-en))
 - **IT Park University (ITPU)** — run by EPAM + IT Park, internship-integrated education
+
+---
+
+## 2.5 Engineering & Energy Companies
+
+Uzbekistan is experiencing a massive infrastructure and energy boom, attracting billions in foreign investment. These companies have active operations in the country and represent significant employment and partnership opportunities for engineers.
+
+### International Engineering & Energy Companies Active in Uzbekistan
+
+| Company | Country | What They're Building in UZ |
+|---------|---------|---------------------------|
+| **ACWA Power** | Saudi Arabia | 1,000 MW Tashkent Riverside solar, 2x 500 MW wind farms, Tashkent office |
+| **Enter Engineering** | Uzbekistan | $3B MTO Gas Chemical Complex, largest EPC in Central Asia |
+| **Voltalia** | France | 100 MW solar Khorezm, 200 MW wind+storage, 500 MW "Turan" storage (2026) |
+| **Mitsubishi** | Japan | 900 MW Turakurgan power plant, 1,000 MW solar park |
+| **TotalEnergies** | France | 131 MW Tutly solar plant operational in Samarkand |
+| **Sumitomo** | Japan | 1,000 MW solar park in Bukhara/Samarkand |
+| **Koc Construction** | Turkey | 6,500 employees across 15 sites in Tashkent/Samarkand/Bukhara |
+| **Hyundai Engineering** | Korea | $2.6B GTL plant, 450 MW power plant |
+| **Nokia** | Finland | 5G rollout with Perfectum |
+| **VEON/Beeline** | Netherlands | Major 4G/5G telecom infrastructure |
+| **China Gezhouba (CGGC)** | China | 1,000 MW solar in Bukhara/Kashkadarya |
+| **Dongfang Electric** | China | 11.4 MW hydropower station |
+| **Charge Robotics** | USA (YC) | Robots that build solar farms (active in Central Asia) |
+
+### Major Renewable Energy Projects
+
+| Project | Capacity | Company | Status |
+|---------|----------|---------|--------|
+| Tashkent Riverside Solar | 1,000 MW | ACWA Power | Under construction |
+| Bukhara/Kashkadarya Solar | 1,000 MW | CGGC | Completed |
+| Bukhara/Samarkand Solar Park | 1,000 MW | Sumitomo | Announced |
+| Khorezm Solar | 100 MW | Voltalia | Commissioning 2025 |
+| Samarkand/Jizzakh Solar | 440 MW | IFC-backed | Under construction |
+| Tutly Solar | 131 MW | TotalEnergies | Operational |
+| Karakalpakstan Wind | 4 farms, 1,600 MW | Various | Commissioning 2026 |
+| ACWA Wind Farms | 2x 500 MW | ACWA Power | ADB-financed |
+| Turan Storage | 500 MW | Voltalia | Construction 2026 |
 
 ---
 
@@ -105,6 +150,15 @@ Uzbekistan has a growing remote work infrastructure. Key platforms listing Uzbek
 - Remote dev rates from Uzbekistan: **$20-60/hr** (general), **$40-100/hr** (AI/ML specialist)
 - Upwork, Toptal, and Turing are active platforms
 - AI-related freelance work grew 60% YoY; AI freelancers earn 44% more than generalists
+
+### Cost of Living in Tashkent
+Rough estimates (as of 2026):
+- **1-bedroom apartment:** $300-500/month
+- **Coworking space:** $50-150/month
+- **Meals:** $3-8 average
+- **Monthly living (comfortable):** $800-1,200
+
+> Tashkent is significantly cheaper than most capitals, especially for remote workers earning USD. A comfortable lifestyle here costs a fraction of what it would in the US or Europe.
 
 ### Key Considerations
 - **Time zone:** Tashkent is UTC+5 (11-14 hours ahead of US Pacific/Eastern). Overlap with US East Coast: ~6-9 AM Tashkent = evening US ET. This makes async work or early-morning sync calls viable
@@ -212,7 +266,23 @@ Uzbekistan has a growing remote work infrastructure. Key platforms listing Uzbek
 
 ---
 
-## Top 5 Actionable Moves (Ranked by Impact)
+## Visa & Legal for Returning/Visiting
+
+### IT Visa
+Uzbekistan offers a **3-year multi-entry IT Visa** for foreign tech professionals. This is designed to attract international talent to work at IT Park-registered companies or collaborate on tech projects. Apply through IT Park.
+
+### El Yurt Umidi Foundation
+A presidential scholarship program that sends Uzbek students to top international universities. **Returning scholars receive career placement support**, including connections to employers and government agencies. Relevant for anyone who studied abroad and is considering returning.
+
+### Freelancer Registration
+Since 2020, **67 self-employed professions are tax-exempt** in Uzbekistan. This includes most IT and creative professions. Registration is straightforward and allows legal freelancing without forming a company.
+
+### IT Park Membership
+The simplest path to a legal entity with **full tax exemption until 2040**. IT Park membership provides corporate tax, income tax, VAT, and customs duty exemptions. This is the recommended route for anyone building a tech product or providing IT services in Uzbekistan.
+
+---
+
+## Top 6 Actionable Moves (Ranked by Impact)
 
 ### 1. Apply to Plug and Play Uzbekistan Batch 5
 Build an AI product (even a rough MVP) before summer. Apply to the next Plug and Play cohort. This offers Silicon Valley-tier mentorship, investor access, and IT Park backing — all in Tashkent. Strong AI/ML skills and a working prototype make for a competitive application.
@@ -228,6 +298,9 @@ Network with founders, investors, and tech professionals. Speaker applications m
 
 ### 5. Teach AI Workshops at IT Park
 The government is spending $100M on AI education and needs trainers. International university backgrounds combined with hands-on AI experience and English fluency are rare in Uzbekistan. Propose a workshop series on practical AI/ML (Python, CNNs, computer vision) to IT Park's education team.
+
+### 6. Network on LinkedIn Before You Arrive
+LinkedIn cold outreach to professionals at the companies listed in this guide actually works. People have gotten HR referrals and internship offers by reaching out directly to engineers, hiring managers, and country directors at ACWA Power, EPAM, Enter Engineering, and others operating in Uzbekistan. Start building connections 2-3 months before you plan to visit or relocate. A short, specific message explaining what you bring and what you are looking for gets responses.
 
 ---
 
