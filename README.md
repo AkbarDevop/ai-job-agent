@@ -104,21 +104,34 @@ Each script outputs structured JSON so it can be piped to other tools or consume
 
 ## Real Results
 
-This isn't a side project with synthetic benchmarks. It was built during an actual job search, refined across 200+ real applications.
+This isn't a side project with synthetic benchmarks. It was built during an actual job search, refined across 228+ real applications.
 
 ### Applications
-- **200+ applications submitted** across LinkedIn Easy Apply, Greenhouse, Lever, Jobvite, and Ashby
+- **228+ applications submitted** across LinkedIn Easy Apply, Greenhouse, Lever, Jobvite, and Ashby
 - **5 ATS platforms** fully automated with config-driven form filling
 - **Auto-answer engine** handles work authorization, EEO, screening questions, and custom fields
 - Applications that hit CAPTCHAs are logged honestly as "blocked" — no fake submissions
 - **Two-resume routing**: software/AI roles get one resume, EE/embedded roles get another
 
 ### LinkedIn Networking
-- Sent personalized connection requests to recruiters at target companies with notes referencing specific roles
+- **65+ connection requests sent** across 4 rounds of outreach (energy companies, government, development banks, universities)
+- **38 connections accepted** — multiple led to HR referral chains (e.g., TotalEnergies: Joris → Lena → Gulbahor)
+- Uses the `/preload/custom-invite/` URL method for reliable connection requests without hitting LinkedIn's invite limits
+- Multilingual notes (English + Uzbek) personalized per recipient and company
 - Researched Uzbekistan's energy sector, identified 9 professionals, sent personalized requests in under an hour
 - **2 of 8 accepted within 24 hours** — one replied with a direct HR contact email
 - Monitors which connections were accepted and sends tailored follow-up DMs
 - Full lifecycle: research companies → find people → craft notes → send requests → track acceptances → follow up
+
+### Cold Email & Outreach
+- **228+ cold emails sent** to hiring managers, VPs, and HR contacts at target companies
+- **2 VP interview callbacks** from cold emails alone (GFT and HBK Engineering)
+- **1 internship offer** from Koc Construction (Uzbekistan) via cold outreach
+- **1 GIZ renewable energy internship offer** through targeted outreach
+- **55 day-7 follow-ups sent** automatically to non-responders
+- **10 Mizzou alumni emailed** via university Outlook for warm introductions
+- **12 Handshake applications submitted** through the university job board
+- Multiple HR referral chains built through persistent follow-up (TotalEnergies: Joris → Lena → Gulbahor)
 
 ### International Outreach
 - Researched Uzbekistan's entire tech and engineering ecosystem in a single session
@@ -239,6 +252,8 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 
 **Real example**: In one session, the agent researched Uzbekistan's engineering sector, identified 9 professionals at companies like Siemens Energy, Masdar, Worley, and ERIELL, crafted personalized connection notes (some in Uzbek), and sent all requests. The next session, it checked for acceptances, found 2 new connections, read a reply written in Uzbek, translated it, and extracted a direct HR email — all without re-explaining any context.
 
+**Another example**: In one session, the agent cold-emailed a VP at an engineering firm (GFT). He responded asking for a resume. Two interviews later, the candidate is waiting on an offer. The entire chain — from finding the contact, drafting the email, sending the follow-up, and prepping for the interview — was orchestrated across multiple agent sessions using the same handoff file.
+
 ## Project Structure
 
 ```
@@ -326,7 +341,7 @@ Please open an issue before starting significant work so we can discuss the appr
 
 ## Credits
 
-Built by [Akbar](https://akbar.one) during a real job search. Refined across 200+ actual applications using [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+Built by [Akbar](https://akbar.one) during a real job search. Refined across 228+ actual applications using [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
 This toolkit reflects the patterns that emerged from automating a job search at scale: cookie-based authentication, pattern-matching auto-answers, config-driven form filling, multi-platform tracking, LinkedIn networking automation, international market research, multilingual outreach, and agent handoff for session continuity.
 
