@@ -16,7 +16,7 @@ A friend asked me: can't a terminal agent just do this?
 
 So I tried it. I gave Claude Code access to my resume, my transcript, and my real application data. I told it the truth about my work authorization (F-1 student, Uzbek citizen, CPT-eligible, no sponsorship needed now, will need it later). I said: apply to internships for me. Log everything. Don't lie.
 
-**It worked.** The agent submitted 200+ real applications across 5 ATS platforms. It split my resume into two variants (software vs. EE) and routed each application to the right one. It tracked everything in a Google Sheet. It skipped roles that required citizenship. It logged CAPTCHAs honestly as "blocked" instead of pretending it submitted.
+**It worked.** The agent submitted 228+ real applications across 5 ATS platforms. It split my resume into two variants (software vs. EE) and routed each application to the right one. It tracked everything in a Google Sheet. It skipped roles that required citizenship. It logged CAPTCHAs honestly as "blocked" instead of pretending it submitted.
 
 But that was just the beginning.
 
@@ -26,7 +26,11 @@ Next day, I said: check if anyone accepted. The agent opened LinkedIn, scrolled 
 
 That's not a copilot filling out forms. That's an agent running a job search.
 
-I still haven't landed an internship yet. Maybe it's the rough market for international students, maybe my CV still needs work, maybe it's both. But this toolkit turned a 2-hour daily grind into something that runs while I study.
+Then I told it to cold email engineering firm VPs in Missouri. One of them, a Senior Vice President at a power engineering firm, responded within hours asking for my resume. Two panel interviews later, I'm waiting on an offer for a Substation Engineering Intern role in St. Louis. That entire pipeline, from cold email to interview, was built and executed by the agent.
+
+The agent also ran 6 subagents in parallel: one sending cold emails to SF startup founders, one connecting with engineers in Uzbekistan on LinkedIn, one applying to internships on Handshake, one researching companies, and two checking for replies. All at the same time. All personalized.
+
+I'm open-sourcing the whole thing because nobody should have to type their graduation date into 200 different text fields.
 
 I'm open-sourcing the whole thing because nobody should have to type their graduation date into 200 different text fields.
 
@@ -115,7 +119,8 @@ This isn't a side project with synthetic benchmarks. It was built during an actu
 
 ### LinkedIn Networking
 - **65+ connection requests sent** across 4 rounds of outreach (energy companies, government, development banks, universities)
-- **38 connections accepted** — multiple led to HR referral chains (e.g., TotalEnergies: Joris → Lena → Gulbahor)
+- **38+ connections accepted** — multiple led to HR referral chains (e.g., TotalEnergies: Joris → Lena → Gulbahor)
+- **6 subagents running in parallel** — sending emails, LinkedIn requests, Handshake applications, and checking replies simultaneously
 - Uses the `/preload/custom-invite/` URL method for reliable connection requests without hitting LinkedIn's invite limits
 - Multilingual notes (English + Uzbek) personalized per recipient and company
 - Researched Uzbekistan's energy sector, identified 9 professionals, sent personalized requests in under an hour
@@ -127,7 +132,9 @@ This isn't a side project with synthetic benchmarks. It was built during an actu
 - **228+ cold emails sent** to hiring managers, VPs, and HR contacts at target companies
 - **2 VP interview callbacks** from cold emails alone (GFT and HBK Engineering)
 - **1 internship offer** from Koc Construction (Uzbekistan) via cold outreach
-- **1 GIZ renewable energy internship offer** through targeted outreach
+- **1 GIZ renewable energy internship offer** through targeted LinkedIn outreach
+- **1 panel interview** at GFT (Gannett Fleming TranSystems) for Substation Engineering Intern, cold email to VP led to 2 interviews
+- **1 VP resume request** from HBK Engineering (Kansas City) via cold email
 - **55 day-7 follow-ups sent** automatically to non-responders
 - **10 Mizzou alumni emailed** via university Outlook for warm introductions
 - **12 Handshake applications submitted** through the university job board
