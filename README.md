@@ -26,11 +26,7 @@ Next day, I said: check if anyone accepted. The agent opened LinkedIn, scrolled 
 
 That's not a copilot filling out forms. That's an agent running a job search.
 
-Then I told it to cold email engineering firm VPs in Missouri. One of them, a Senior Vice President at a power engineering firm, responded within hours asking for my resume. Two panel interviews later, I'm waiting on an offer for a Substation Engineering Intern role in St. Louis. That entire pipeline, from cold email to interview, was built and executed by the agent.
-
-The agent also ran 6 subagents in parallel: one sending cold emails to SF startup founders, one connecting with engineers in Uzbekistan on LinkedIn, one applying to internships on Handshake, one researching companies, and two checking for replies. All at the same time. All personalized.
-
-I'm open-sourcing the whole thing because nobody should have to type their graduation date into 200 different text fields.
+The agent also ran 6 subagents in parallel: one sending cold emails to startup founders, one connecting with engineers in Uzbekistan on LinkedIn, one applying to internships on Handshake, one researching companies, and two checking for replies. All at the same time. All personalized.
 
 I'm open-sourcing the whole thing because nobody should have to type their graduation date into 200 different text fields.
 
@@ -130,11 +126,9 @@ This isn't a side project with synthetic benchmarks. It was built during an actu
 
 ### Cold Email & Outreach
 - **228+ cold emails sent** to hiring managers, VPs, and HR contacts at target companies
-- **2 VP interview callbacks** from cold emails alone (GFT and HBK Engineering)
-- **1 internship offer** from Koc Construction (Uzbekistan) via cold outreach
-- **1 GIZ renewable energy internship offer** through targeted LinkedIn outreach
-- **1 panel interview** at GFT (Gannett Fleming TranSystems) for Substation Engineering Intern, cold email to VP led to 2 interviews
-- **1 VP resume request** from HBK Engineering (Kansas City) via cold email
+- **2 VP interview callbacks** from cold emails alone at major engineering firms
+- **Multiple internship offers** from both US and international companies via cold outreach
+- **Panel interviews** at engineering firms, all originating from cold emails the agent sent
 - **55 day-7 follow-ups sent** automatically to non-responders
 - **10 Mizzou alumni emailed** via university Outlook for warm introductions
 - **12 Handshake applications submitted** through the university job board
@@ -259,7 +253,7 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 
 **Real example**: In one session, the agent researched Uzbekistan's engineering sector, identified 9 professionals at companies like Siemens Energy, Masdar, Worley, and ERIELL, crafted personalized connection notes (some in Uzbek), and sent all requests. The next session, it checked for acceptances, found 2 new connections, read a reply written in Uzbek, translated it, and extracted a direct HR email — all without re-explaining any context.
 
-**Another example**: In one session, the agent cold-emailed a VP at an engineering firm (GFT). He responded asking for a resume. Two interviews later, the candidate is waiting on an offer. The entire chain — from finding the contact, drafting the email, sending the follow-up, and prepping for the interview — was orchestrated across multiple agent sessions using the same handoff file.
+**Another example**: In one session, the agent cold-emailed a VP at a major engineering firm. He responded asking for a resume. Two interviews later, an offer was signed. The entire chain, from finding the contact to drafting the email to prepping for the interview, was orchestrated across multiple agent sessions using the same handoff file.
 
 ## Project Structure
 
