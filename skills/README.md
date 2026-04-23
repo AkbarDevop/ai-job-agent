@@ -1,12 +1,18 @@
 # Claude Code Skills for Job Hunting
 
-This toolkit ships with 6 bundled skills that wrap the scripts in `scripts/` so you can drive the whole flow from inside a Claude Code session. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with 7 bundled skills that wrap the scripts in `scripts/` so you can drive the whole flow from inside a Claude Code session. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
 
 ---
 
 ## Bundled Skills (Built-In)
 
 These live inside this repo at `skills/<name>/SKILL.md` and wrap the existing Node.js / Python scripts. They render results as markdown tables so you can see what happened at a glance.
+
+### Setup (do this first)
+
+| Skill | What it does |
+|-------|--------------|
+| `/job-setup` | Conversational onboarding — identity, education, work auth, resume path, Chrome cookies, optional msmtp for cold email. Writes `config/linkedin-config.json`, `config/candidate-profile.md`, creates trackers, installs deps, registers all skills. The in-chat replacement for `bash wizard.sh`. |
 
 ### Apply & track
 
@@ -24,7 +30,7 @@ These live inside this repo at `skills/<name>/SKILL.md` and wrap the existing No
 | `/job-outreach <target>` | Research a company/person, draft a personalized cold email in-chat, approve, send via local msmtp, log. | `send-cold-email.js` + Claude (the LLM is *this* agent — no external API) |
 | `/job-followup [send]` | Read `outreach-log.csv`, compute urgency using a 7-day cadence, walk follow-ups one at a time. Max 2 follow-ups per contact. | `outreach-log.csv` + `send-cold-email.js` |
 
-See `docs/SETUP.md#cold-email-setup-msmtp--gmail` for msmtp configuration (Gmail app password).
+See `docs/SETUP.md#cold-email-setup-msmtp--gmail` for manual msmtp configuration — or just run `/job-setup` and answer "yes" when it asks about cold email.
 
 ### Install the bundled skills
 
@@ -44,7 +50,15 @@ bash skills/install.sh --uninstall
 
 ### Try them
 
-Open a new Claude Code session and type one of:
+Open a new Claude Code session inside the repo. Start with:
+
+```
+/job-setup
+```
+
+It asks for your name, school, work auth, resume path, Chrome cookies, and (optionally) walks you through Gmail App Password + msmtp for cold email. Writes every config file and registers every skill.
+
+Then any of:
 
 ```
 /job-apply https://www.linkedin.com/jobs/view/1234567890

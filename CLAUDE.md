@@ -15,12 +15,15 @@ Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). 
 
 | Skill | Wraps | Output |
 |-------|-------|--------|
+| `/job-setup` | `wizard.sh` equivalent — but in chat | conversational onboarding, writes all configs, installs skills |
 | `/job-apply <url> [--submit]` | 5 ATS fillers (auto-routed by URL host) | result table: platform, outcome, exit code |
 | `/job-track [sync]` | local CSV + `google-sheet-sync.py` | counts-by-status table + recent activity |
 | `/job-triage [query]` | `outlook-triage.js` | classified-email counts + preview table, step-through extract/mark-read |
 | `/job-status <updates.json>` | `tracker-status-update.py` | before/after diff, confirmation prompt, result summary |
 | `/job-outreach <target>` | `send-cold-email.js` + Claude (the agent drafts) | research → draft preview → dry-run → send → log to `outreach-log.csv` |
 | `/job-followup [send]` | `outreach-log.csv` + `send-cold-email.js` | urgency table (overdue/due/soon/waiting) + optional step-through send |
+
+**First-run flow:** open Claude Code in the repo, type `/job-setup`, answer the questions. Everything else is live after that. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users but the skill path is the recommended one.
 
 Skills find this repo via `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`. Set the env var or rerun `install.sh` from a non-default clone location.
 

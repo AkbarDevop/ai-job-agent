@@ -53,7 +53,37 @@ I'm open-sourcing the whole thing because nobody should have to type their gradu
 
 ## Get Started in 5 Minutes
 
-### Option 1: Interactive Wizard (recommended)
+### Option 1: `/job-setup` inside Claude Code (recommended)
+
+```bash
+git clone https://github.com/AkbarDevop/ai-job-agent.git
+cd ai-job-agent
+claude                  # open Claude Code in the repo
+```
+
+Then type:
+
+```
+/job-setup
+```
+
+Claude walks you through the whole onboarding in chat — no bash wizard, no JSON editing:
+
+```
+Step 1:  The Basics      → name, email, phone, location
+Step 2:  Education       → school, major, GPA, graduation, degree type
+Step 3:  Work Auth       → visa status (auto-fills sponsorship logic)
+Step 4:  EEO Demographics → optional gender/race for EEO forms
+Step 5:  Resume          → point to your PDF (paste the path)
+Step 6:  Chrome Cookies  → auto-detects, asks if different
+Step 7:  Cold email      → optional — msmtp + Gmail App Password walkthrough
+Step 8:  Generate configs → writes every file
+Step 9:  Install deps + register skills (npm install + bash skills/install.sh)
+```
+
+At the end all 7 bundled skills are live. Try `/job-apply <url>`, `/job-outreach <target>`, `/job-track` right away.
+
+### Option 2: Interactive bash wizard (no Claude Code)
 
 ```bash
 git clone https://github.com/AkbarDevop/ai-job-agent.git
@@ -61,27 +91,15 @@ cd ai-job-agent
 bash wizard.sh
 ```
 
-The wizard walks you through everything step by step:
+Same questions as `/job-setup`, just driven by a bash script. Stops short of registering the skills (since you're not using Claude Code).
 
-```
-Step 1 of 6: The Basics      → name, email, phone, location
-Step 2 of 6: Education        → school, major, GPA, graduation
-Step 3 of 6: Work Auth        → visa status, sponsorship needs (auto-fills form logic)
-Step 4 of 6: EEO Demographics → optional gender/race for EEO forms
-Step 5 of 6: Resume           → point to your PDF (drag & drop into terminal)
-Step 6 of 6: Chrome Cookies   → auto-detects your Chrome cookie path
-```
-
-At the end, your config files are generated automatically. No JSON editing required.
-
-### Option 2: Manual Setup
+### Option 3: Fully manual
 
 ```bash
 git clone https://github.com/AkbarDevop/ai-job-agent.git
 cd ai-job-agent
 bash setup.sh
 
-# copy templates and edit them
 cp config/linkedin-config.template.json config/linkedin-config.json
 cp config/candidate-profile.template.md config/candidate-profile.md
 $EDITOR config/linkedin-config.json
@@ -242,6 +260,7 @@ bash skills/install.sh   # one-time — symlinks the skills into ~/.claude/skill
 
 | Skill | What it does |
 |-------|--------------|
+| `/job-setup` | Conversational onboarding. Asks for identity, education, work auth, resume path, Chrome cookies, optional msmtp. Writes every config file and registers all the skills. In-chat replacement for `bash wizard.sh`. |
 | `/job-apply <url>` | Apply to a job by URL. Auto-routes to the right ATS filler (LinkedIn / Greenhouse / Lever / Jobvite / Ashby). Dry-run by default; pass `--submit` to actually submit. |
 | `/job-track [sync]` | Show your local tracker grouped by status. Pass `sync` to push new rows to Google Sheets. |
 | `/job-triage [query]` | Search Outlook Web, classify results (rejection / interview / confirmation / …), step through extract/mark-read. |
@@ -301,6 +320,7 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   +-- tracker-status-update.py       # Batch status updater
 |-- skills/
 |   |-- install.sh                     # register bundled skills into ~/.claude/skills/
+|   |-- job-setup/SKILL.md             # /job-setup — in-chat onboarding
 |   |-- job-apply/SKILL.md             # /job-apply — auto-routes ATS filler
 |   |-- job-track/SKILL.md             # /job-track — tracker + sheet sync
 |   |-- job-triage/SKILL.md            # /job-triage — Outlook search + classify
