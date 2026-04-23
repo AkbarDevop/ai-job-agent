@@ -236,7 +236,7 @@ config/
   example-config.json           # Reference example with all fields
 ```
 
-If you used `wizard.sh`, these are already generated for you.
+If you ran `/job-setup` (or `bash wizard.sh`) these are already generated for you.
 
 If you want to set up manually, start from the templates:
 
@@ -250,9 +250,11 @@ See [docs/SETUP.md](docs/SETUP.md) for a detailed walkthrough.
 
 ## Claude Code Skills
 
-This toolkit ships with **4 bundled skills** that turn the scripts above into slash commands inside any Claude Code session. It also pairs well with 27+ community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with **7 bundled skills** that turn the scripts above into slash commands inside any Claude Code session. It also pairs well with 27+ community-built skills for resume tailoring, interview prep, and more.
 
 ### Bundled skills (built in)
+
+Run `/job-setup` and the skills register themselves. Or install manually:
 
 ```bash
 bash skills/install.sh   # one-time — symlinks the skills into ~/.claude/skills/
