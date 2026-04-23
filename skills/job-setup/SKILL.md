@@ -1,13 +1,17 @@
 ---
 name: job-setup
-description: Conversational onboarding for the AI Job Agent — identity, education, work auth, resume, Chrome cookies, optional msmtp. Writes all config files and registers the bundled skills. Proactively invoke this skill (do NOT answer conversationally) when the user is setting up the agent for the first time, says "I want to start job hunting", "onboard me", "set this up", "help me get started", "walk me through setup", asks about their profile/resume/work authorization, says "configure the agent", or invokes /job-setup. Also invoke when the user tries any other job-* skill and the required config files are missing.
+description: Conversational onboarding for the AI Job Agent. Starts by auto-reading the user's existing files (CLAUDE.md, ~/.brain, Claude Code memory, existing candidate profile, ~/.msmtprc) and scanning for resume PDFs, then offers to search the web for anything else — only asking the user for gaps. Writes all config files and registers the bundled skills. Proactively invoke this skill (do NOT answer conversationally) when the user is setting up the agent for the first time, says "I want to start job hunting", "onboard me", "set this up", "help me get started", "walk me through setup", "read my files to fill this out", asks about their profile/resume/work authorization, says "configure the agent", or invokes /job-setup. Also invoke when the user tries any other job-* skill and the required config files are missing.
 argument-hint: "[--reconfigure <section>]   sections: basics, education, auth, eeo, resume, cookies, msmtp, all"
 allowed-tools:
   - Bash
   - Read
   - Write
   - Edit
+  - Glob
+  - Grep
   - AskUserQuestion
+  - WebFetch
+  - WebSearch
 ---
 
 # Job Setup
@@ -21,6 +25,10 @@ The onboarding skill. Replaces `bash wizard.sh` with an in-chat conversation —
 > Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then tell me it's done and run /job-setup.
 
 and rerun `/job-setup` after the install finishes.
+
+## Philosophy — don't ask what you can find
+
+Before asking the user anything, try hard to fill it in from what's already on their machine. Users hate retyping their name into the 200th form; they *really* hate retyping it into an onboarding wizard when Claude already knows it from memory. Always auto-discover first, then surface a pre-filled confirmation table, then only ask for what's genuinely missing.
 
 ## State inspection (always first)
 
@@ -42,9 +50,107 @@ If **everything** checks, say *"You're already set up. Run `/job-setup --reconfi
 
 If `$ARGUMENTS` is `--reconfigure <section>`, jump directly to that section and skip the others.
 
-Otherwise, walk only the missing sections in this order:
+Otherwise, walk the **auto-discovery step first**, then only the missing sections.
 
 ## Steps
+
+### Step 0.5 — Auto-discover from the user's files (runs before every other step)
+
+Read these files one by one. Each read is "best-effort" — if it doesn't exist, skip and move on. Don't ask the user for permission; these are all files Claude Code already has access to and that the user effectively opted into by running `/job-setup`.
+
+**Personal config + memory:**
+
+- `~/CLAUDE.md` — the user's own CLAUDE.md. Often has their name, school, current role context.
+- `~/.brain/context/akbar.md` (or whatever `~/.brain/context/<name>.md` exists) — shared-brain user profile.
+- `~/.brain/agents/jobhunt.md` — the jobhunt agent file. Stats, tracker paths, historical context.
+- `~/.claude/projects/*/memory/MEMORY.md` — Claude Code's auto-memory index.
+- `~/.claude/projects/*/memory/user_profile.md` — the user memory itself (often has role, school, project context).
+
+Use Glob for patterns:
+
+```
+~/.claude/projects/**/memory/user_*.md
+~/.claude/projects/**/memory/MEMORY.md
+```
+
+Read anything that matches.
+
+**Email (from the msmtp config if it exists):**
+
+```bash
+grep -E '^(from|user)' ~/.msmtprc 2>/dev/null
+```
+
+This is the easiest email to find — `.msmtprc` already has it.
+
+**Existing candidate profile (partial migrations):**
+
+- `<repo>/config/candidate-profile.md` — if present but stale
+- `<repo>/config/linkedin-config.json` — if present but incomplete
+
+**Resume PDFs (scan common paths):**
+
+Use Glob on these patterns in order; stop at the first 5 hits:
+
+```
+~/Desktop/**/*[Rr]esume*.pdf
+~/Desktop/**/*CV*.pdf
+~/Documents/**/*[Rr]esume*.pdf
+~/Documents/**/*CV*.pdf
+~/Downloads/**/*[Rr]esume*.pdf
+```
+
+For each candidate PDF, capture path + mtime. The most recently modified one is likely the live resume.
+
+**LinkedIn URL (from whatever source):**
+
+Search all the files you just read for `linkedin.com/in/*` URLs. The first match is almost always the user's own profile.
+
+**Build the discovery report:**
+
+Render a table of what you found. Every field should be either:
+- a concrete value pulled from the files (show the source file path in dim text)
+- `<ask user>` if nothing credible found
+
+```
+| Field              | Value found                        | Source                        |
+|--------------------|------------------------------------|-------------------------------|
+| First name         | Akbarjon                           | ~/CLAUDE.md                   |
+| Last name          | Kamoldinov                         | ~/.brain/context/akbar.md     |
+| Preferred name     | Akbar                              | memory/user_profile.md        |
+| Email              | k.akbarme@gmail.com                | ~/.msmtprc                    |
+| Phone              | <ask user>                         | —                             |
+| City, State        | Columbia, Missouri                 | inferred from "junior at Mizzou" |
+| School             | University of Missouri (Mizzou)    | ~/.brain/context/akbar.md     |
+| Major              | Electrical Engineering             | memory/user_profile.md        |
+| Expected graduation| <ask user>                         | —                             |
+| GPA                | <ask user>                         | —                             |
+| Degree type        | Bachelor's                         | inferred                      |
+| LinkedIn URL       | linkedin.com/in/akbarjon-kamoldinov | memory/MEMORY.md             |
+| Country of origin  | Uzbekistan                         | ~/.brain/context/akbar.md     |
+| Resume PDF (best)  | ~/Desktop/Akbar_Resume_2026.pdf    | mtime 2026-04-12              |
+| Resume PDF (alt)   | ~/Documents/akbar-resume-EE.pdf    | mtime 2026-03-28              |
+```
+
+**Offer one round of web research (optional):**
+
+If the user gave you a LinkedIn URL or you found one, offer — don't auto-run — a WebFetch to pull their current role/headline:
+
+> Want me to fetch your LinkedIn profile to pick up anything else (headline, current role, recent projects)? (y/n)
+
+On `y`: `WebFetch linkedin.com/in/<handle>` and enrich the discovery table. On `n`: skip.
+
+Similarly, if the user asks or if key fields are still `<ask user>`, offer a web search:
+
+> Want me to search the web for more about you (e.g. your public GitHub, personal site)? I'll only use it to fill this profile. (y/n)
+
+**Confirmation gate:**
+
+Show the enriched table. Ask:
+
+> I've auto-filled what I could from your files. Anything wrong, or fields I should fill in? Either say "looks good" or paste corrections like "phone: 555-123-4567, graduation: May 2027".
+
+Process corrections. Then walk any remaining `<ask user>` fields through the normal Step 1–6 flow below, skipping anything that's already filled. Do NOT re-ask fields that came back `looks good`.
 
 ### Step 1 — The Basics (skip if `linkedin-config.json` exists)
 
