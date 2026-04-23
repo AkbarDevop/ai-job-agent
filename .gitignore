@@ -23,5 +23,9 @@ application-tracker.csv
 submitted-applications-*.md
 *.json.bak
 
+# Outreach data (personal — emails sent, drafts on disk)
+outreach-log.csv
+outreach/
+
 # Chrome profiles
 chrome-data/

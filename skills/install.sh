@@ -15,7 +15,7 @@ REPO_ROOT="$(cd "$SKILLS_DIR/.." && pwd)"
 TARGET_ROOT="${HOME}/.claude/skills"
 MARKER_DIR="${TARGET_ROOT}/ai-job-agent"
 
-BUNDLED=(job-apply job-track job-triage job-status)
+BUNDLED=(job-apply job-track job-triage job-status job-outreach job-followup)
 
 uninstall() {
   for name in "${BUNDLED[@]}"; do

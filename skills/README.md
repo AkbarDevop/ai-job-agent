@@ -1,6 +1,6 @@
 # Claude Code Skills for Job Hunting
 
-This toolkit ships with 4 bundled skills that wrap the scripts in `scripts/` so you can drive the whole flow from inside a Claude Code session. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with 6 bundled skills that wrap the scripts in `scripts/` so you can drive the whole flow from inside a Claude Code session. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
 
 ---
 
@@ -8,12 +8,23 @@ This toolkit ships with 4 bundled skills that wrap the scripts in `scripts/` so 
 
 These live inside this repo at `skills/<name>/SKILL.md` and wrap the existing Node.js / Python scripts. They render results as markdown tables so you can see what happened at a glance.
 
+### Apply & track
+
 | Skill | What it does | Wraps |
 |-------|--------------|-------|
 | `/job-apply <url>` | Apply to a job via URL. Auto-routes to the right ATS filler, dry-run by default. | `linkedin-easy-apply.js`, `greenhouse-apply.js`, `lever-apply.js`, `jobvite-apply.js`, `ashby-apply.js` |
 | `/job-track [sync]` | Show the local tracker grouped by status. Optionally sync to Google Sheets. | `google-sheet-sync.py`, `application-tracker.csv` |
 | `/job-triage [query]` | Search Outlook, classify results (rejection / interview / confirmation / …), render counts + preview, step through extract / mark-read. | `outlook-triage.js` |
 | `/job-status <updates.json>` | Batch-update statuses in both the Google Sheet and local CSV. Shows diff, asks to confirm. | `tracker-status-update.py` |
+
+### Cold outreach (msmtp)
+
+| Skill | What it does | Wraps |
+|-------|--------------|-------|
+| `/job-outreach <target>` | Research a company/person, draft a personalized cold email in-chat, approve, send via local msmtp, log. | `send-cold-email.js` + Claude (the LLM is *this* agent — no external API) |
+| `/job-followup [send]` | Read `outreach-log.csv`, compute urgency using a 7-day cadence, walk follow-ups one at a time. Max 2 follow-ups per contact. | `outreach-log.csv` + `send-cold-email.js` |
+
+See `docs/SETUP.md#cold-email-setup-msmtp--gmail` for msmtp configuration (Gmail app password).
 
 ### Install the bundled skills
 
@@ -41,6 +52,8 @@ Open a new Claude Code session and type one of:
 /job-track sync
 /job-triage application status
 /job-status rejection-updates.json
+/job-outreach "VP of Substation Engineering at GFT"
+/job-followup
 ```
 
 Each skill is just a markdown file — read `skills/job-apply/SKILL.md` etc. to see exactly what the agent is being told to do.
