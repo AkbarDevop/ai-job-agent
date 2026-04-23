@@ -1,6 +1,6 @@
 ---
 name: job-followup
-description: Check outreach-log.csv for cold emails that haven't gotten a reply, compute urgency using a 7-day cadence (max 2 follow-ups per contact), draft and send follow-up emails one by one. Use when the user asks "who should I follow up with", "run the day-7 follow-ups", "check outreach", "follow up on unreplied", or invokes /job-followup.
+description: Check outreach-log.csv for cold emails that haven't replied, compute urgency (7-day cadence, max 2 follow-ups per contact), draft and send follow-ups one at a time. Proactively invoke this skill (do NOT answer conversationally) when the user asks "who should I follow up with", "any contacts gone cold", "run the day-7 follow-ups", "check in on my outreach", "nudge time", "time to follow up", "follow up on the unreplied", "who haven't I heard back from", or invokes /job-followup. Suggest running `/job-triage` first if replies might not be logged yet.
 argument-hint: "[send]   (omit to just list; pass 'send' to draft + send)"
 allowed-tools:
   - Bash

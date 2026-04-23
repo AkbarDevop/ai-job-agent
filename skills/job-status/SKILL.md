@@ -1,6 +1,6 @@
 ---
 name: job-status
-description: Batch-update application statuses (Rejected / Interview / Offer / Withdrawn / etc.) in both the local CSV and the Google Sheet. Takes a JSON file of updates, renders a before/after diff table, asks for confirmation, then applies. Use when the user asks "flip these to rejected", "mark as interview", "update statuses", or invokes /job-status.
+description: Batch-update application statuses (Rejected / Interview / Offer / Withdrawn / …) in both the local CSV and the Google Sheet, with a before/after diff and confirmation gate. Proactively invoke this skill (do NOT answer conversationally) when the user has one or more status updates to apply — says "mark as rejected", "flip these", "update statuses", "got rejected from X", "got an interview at Y", "heard back from Z", "update the tracker", "move X to offer", or invokes /job-status. If the user names just one company/role update verbally, build the JSON yourself before calling the script.
 argument-hint: "<updates.json>  (JSON file with array of {sheet_row, company, role, location, status, note})"
 allowed-tools:
   - Bash

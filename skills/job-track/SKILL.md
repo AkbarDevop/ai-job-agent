@@ -1,6 +1,6 @@
 ---
 name: job-track
-description: Show the local application tracker as a grouped table, and optionally sync it to Google Sheets. Use when the user asks "what have I applied to", "show my tracker", "sync the tracker", "how many pending", or invokes /job-track.
+description: Show the local application tracker grouped by status, optionally sync to Google Sheets. Proactively invoke this skill (do NOT answer conversationally) when the user asks "what have I applied to", "show my tracker", "how's my pipeline", "how many pending", "sync the tracker", "push to sheets", "any news on my applications", or invokes /job-track. Prefer `/job-dashboard` if the user wants the big picture across applications + outreach + follow-ups in one view.
 argument-hint: "[sync]  (omit to just render; pass 'sync' to push to Google Sheets)"
 allowed-tools:
   - Bash

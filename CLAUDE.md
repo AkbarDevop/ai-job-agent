@@ -24,11 +24,11 @@ Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). 
 | `/job-followup [send]` | `outreach-log.csv` + `send-cold-email.js` | urgency table (overdue/due/soon/waiting) + optional step-through send |
 | `/job-dashboard [live]` | `job-dashboard.mjs` (zero deps) | ANSI tables: applications + outreach + follow-ups. Snapshot in chat or `npm run dashboard` for live TUI |
 
-**First-run flow (gstack-style):** open Claude Code anywhere and paste:
+**First-run flow (gstack-style):** open Claude Code anywhere and paste this one message:
 
-> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then run /job-setup.
+> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md that tells you to proactively route job-search talk through the bundled skills — job URL → /job-apply, reaching out to a person → /job-outreach, follow-ups → /job-followup, "how am I doing" → /job-dashboard, tracker → /job-track, status updates → /job-status, Outlook → /job-triage, setup or missing config → /job-setup. Tell me when done, then run /job-setup.
 
-Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills as symlinks under `~/.claude/skills/`, and runs `/job-setup` for identity + resume + optional msmtp. No `cd` required ever; the skills work from any directory in any session. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users.
+Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills as symlinks under `~/.claude/skills/`, writes the proactive-routing block into CLAUDE.md, and runs `/job-setup`. **After that, the user talks naturally** — "I want to apply to this url", "email the VP at X", "who should I follow up with", "how am I doing" — and Claude dispatches to the right skill. No `cd` required ever; skills work from any directory in any session. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users.
 
 Skills find this repo via `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`. Set the env var or rerun `install.sh` from a non-default clone location.
 

@@ -35,11 +35,13 @@ This guide walks through every step of setting up the AI Job Application Agent t
 
 ### Option A: Paste-to-Claude (Recommended, gstack-style)
 
-Open Claude Code and paste this (one line, Claude interprets the rest):
+Open Claude Code and paste this (one message, Claude interprets the rest):
 
-> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then run /job-setup.
+> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md telling you to proactively route job-search talk through the bundled skills (job URL → /job-apply, reach out to person → /job-outreach, follow-ups → /job-followup, "how am I doing" → /job-dashboard, tracker → /job-track, status changes → /job-status, Outlook → /job-triage, setup → /job-setup). Tell me it's done and run /job-setup.
 
-Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills globally, and walks you through `/job-setup`: identity → education → work auth → EEO → resume → Chrome cookies → optional msmtp. Single message in, fully configured out.
+Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills globally, writes the proactive-routing block into CLAUDE.md, and walks you through `/job-setup`: identity → education → work auth → EEO → resume → Chrome cookies → optional msmtp. Single message in, fully configured out.
+
+**After that, you just talk naturally** to Claude — "apply to this url", "email the VP at GFT", "who should I follow up with", "how am I doing" — and the skills auto-route. You never need to remember a slash command.
 
 **Skip the rest of this page if you take this route** — the skills handle it all. The sections below are reference material if something needs manual repair.
 

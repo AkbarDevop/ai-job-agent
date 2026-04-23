@@ -1,6 +1,6 @@
 ---
 name: job-outreach
-description: Research a company or hiring manager, draft a personalized cold email in chat, get the user's approval, then send it via local msmtp (Gmail app password). Logs the send to outreach-log.csv for day-7 follow-up tracking. Use when the user asks to "cold email this person", "reach out to the VP at X", "draft an email to this hiring manager", "send outreach to this lead", or invokes /job-outreach.
+description: Research a company or hiring manager, draft a personalized cold email in chat, get approval, send via local msmtp, log for day-7 follow-up tracking. Proactively invoke this skill (do NOT answer conversationally) when the user mentions reaching out to a hiring manager / VP / recruiter / director, pastes a LinkedIn profile URL, pastes a person's email, says "cold email this person", "reach out to the VP at X", "draft an email to the hiring manager", "message this recruiter", "send outreach to this lead", "email the director at Y", "can you write them", "I want to contact someone at Z", or invokes /job-outreach. Always research before drafting — never write a generic email.
 argument-hint: "<company | LinkedIn URL | email address | freeform target>"
 allowed-tools:
   - Bash

@@ -57,18 +57,43 @@ Requirements: [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Git
 
 **Open Claude Code and paste this:**
 
-> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md that says to use the bundled skills for all job-search work — `/job-setup` for onboarding, `/job-apply <url>` for ATS forms, `/job-outreach <target>` for cold emails via msmtp, `/job-followup` for day-7 nudges, `/job-track` for the tracker, `/job-triage` for Outlook, `/job-status <updates.json>` for bulk status flips, `/job-dashboard` for the terminal TUI. Tell me when it's done, then run /job-setup so I can walk through profile, resume, and optional Gmail app password for cold email.
+> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md with this exact text:
+>
+> > For any job-search work, proactively route through the bundled skills instead of answering conversationally. The user should talk naturally (like to a career consultant) — do the dispatching yourself.
+> >
+> > - User pastes a job URL (LinkedIn / Greenhouse / Lever / Jobvite / Ashby) → `/job-apply`
+> > - User mentions reaching out to a hiring manager, VP, recruiter, director, or pastes a LinkedIn profile → `/job-outreach`
+> > - User asks "who should I follow up with" / "any contacts cold" / "time to nudge" → `/job-followup`
+> > - User asks "how am I doing" / "what's my status" / "overview" / "big picture" → `/job-dashboard`
+> > - User asks "what have I applied to" / "show my tracker" / "sync to sheets" → `/job-track`
+> > - User mentions a rejection / interview / offer came in, or wants to update the tracker → `/job-status`
+> > - User asks to check Outlook / inbox for job emails → `/job-triage`
+> > - User is first-time setting up, or config files are missing → `/job-setup`
+>
+> Then tell me it's done and run /job-setup so we can walk through profile, resume, and optional Gmail app password.
 
-Claude does the rest — clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills globally, updates your CLAUDE.md, then drops you into `/job-setup` to collect profile + resume + optional cold-email config.
+Claude does the rest — clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills globally, writes the proactive-routing block into your CLAUDE.md, and drops you into `/job-setup`.
 
-Once installed, the skills work **from any directory** in any Claude Code session. You don't `cd` anywhere. You don't run a bash wizard. You just type:
+Once installed, you **just talk to Claude like a career consultant.** No slash commands to memorize — the skills auto-route based on what you say:
 
 ```
-/job-apply https://linkedin.com/jobs/view/1234567890
-/job-outreach "VP Substation Engineering at GFT"
-/job-followup
-/job-dashboard
+"I want to apply to this: https://linkedin.com/jobs/view/1234567890"
+    → /job-apply runs
+
+"Draft a cold email to the VP of Substation Engineering at GFT"
+    → /job-outreach runs (researches, drafts, two approval gates, sends via msmtp)
+
+"Who should I follow up with today?"
+    → /job-followup renders the urgency table
+
+"How am I doing?"
+    → /job-dashboard renders the snapshot
+
+"I got rejected from Acme and got an interview at Beta"
+    → /job-status flips both rows
 ```
+
+The slash commands still work if you want explicit control — but the whole point is you shouldn't have to remember them.
 
 ### Want to hack on the skills?
 

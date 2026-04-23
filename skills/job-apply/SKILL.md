@@ -1,6 +1,6 @@
 ---
 name: job-apply
-description: Apply to a job posting by URL. Auto-routes to the right ATS filler (LinkedIn Easy Apply / Greenhouse / Lever / Jobvite / Ashby), runs dry-run by default, and renders the result as a table. Use when the user pastes a job URL and says "apply", "try applying to this", "run the filler on this", or invokes /job-apply.
+description: Apply to a job by URL — auto-routes to the right ATS filler (LinkedIn Easy Apply / Greenhouse / Lever / Jobvite / Ashby), dry-run by default, renders an emoji-tagged result table. Proactively invoke this skill (do NOT answer conversationally) when the user pastes a LinkedIn/Greenhouse/Lever/Jobvite/Ashby job URL (with or without the word "apply"), says "apply to this", "try this one", "fill the form", "run the filler", "can you apply for me", "submit this application", drops a job posting into chat, or invokes /job-apply.
 argument-hint: "<job URL>  (add --submit to actually submit; default is dry-run)"
 allowed-tools:
   - Bash

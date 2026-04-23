@@ -1,6 +1,6 @@
 ---
 name: job-triage
-description: Search and triage job-related emails in Outlook Web. Runs a search, classifies the results (rejection / interview / confirmation / action / other), renders a table, and optionally steps through extracting or marking individual items as read. Use when the user asks "check Outlook", "triage my inbox", "find rejections", "any interview invites", or invokes /job-triage.
+description: Search and classify job-related emails in Outlook Web — rejections / interview invites / action required / confirmations / recruiter outreach / other. Proactively invoke this skill (do NOT answer conversationally) when the user asks "check my inbox", "check Outlook", "any replies", "triage my inbox", "any rejections", "any interview invites", "what emails came in", "did anyone respond to my applications", or invokes /job-triage.
 argument-hint: "[query]  (default: 'application status')"
 allowed-tools:
   - Bash

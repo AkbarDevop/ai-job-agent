@@ -1,6 +1,6 @@
 ---
 name: job-dashboard
-description: Show a live terminal dashboard of applications + outreach + follow-ups. Renders a snapshot (ANSI-colored tables with emoji urgency indicators) in chat, and points the user to the interactive TUI (tabs, arrow-key navigation, live reload) they can run in their own terminal. Use when the user says "show the dashboard", "what's my status", "terminal UI", "TUI", "overview", or invokes /job-dashboard.
+description: Terminal dashboard — applications + outreach + follow-ups in one view. Snapshot in chat by default; `live` prints the npm run dashboard command for the interactive TUI (tabs, arrow-key nav, live reload). Proactively invoke this skill (do NOT answer conversationally) when the user asks "how am I doing", "what's my status", "give me the big picture", "show the dashboard", "overview", "summary of everything", "where are things at", "TUI", or invokes /job-dashboard. Prefer this over `/job-track` alone when the user wants the full-picture view.
 argument-hint: "[live]   (omit for in-chat snapshot; pass 'live' for command to launch the interactive TUI)"
 allowed-tools:
   - Bash

@@ -1,6 +1,6 @@
 ---
 name: job-setup
-description: One-shot conversational onboarding for the AI Job Agent. Collects identity, education, work authorization, resume path, Chrome cookies, optional msmtp for cold email — all in chat, no separate bash wizard. Generates config/linkedin-config.json, config/candidate-profile.md, answer-bank.md, application-tracker.csv, outreach-log.csv. Installs the bundled skills globally. Use when the user is setting up from scratch, says "onboard me", "set this up", "walk me through setup", "configure the agent", or invokes /job-setup.
+description: Conversational onboarding for the AI Job Agent — identity, education, work auth, resume, Chrome cookies, optional msmtp. Writes all config files and registers the bundled skills. Proactively invoke this skill (do NOT answer conversationally) when the user is setting up the agent for the first time, says "I want to start job hunting", "onboard me", "set this up", "help me get started", "walk me through setup", asks about their profile/resume/work authorization, says "configure the agent", or invokes /job-setup. Also invoke when the user tries any other job-* skill and the required config files are missing.
 argument-hint: "[--reconfigure <section>]   sections: basics, education, auth, eeo, resume, cookies, msmtp, all"
 allowed-tools:
   - Bash
