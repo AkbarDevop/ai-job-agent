@@ -48,7 +48,10 @@ Render a **before/after** table showing what will change. For the sheet side, th
 
 | # | Sheet row | Company | Role | Status → new | Note appended |
 |---|----------:|---------|------|--------------|---------------|
-| 1 | 42 | Acme Corp | Software Intern | `applied` → **`Rejected`** | "Auto-rejection email received 2026-04-22" |
+| 1 | 42 | Acme Corp | Software Intern | 📄 applied → ❌ **Rejected** | "Auto-rejection email received 2026-04-22" |
+| 2 | 58 | Beta Inc | EE Intern | 📬 submitted → 💼 **Interview** | "Phone screen scheduled for Thu" |
+
+Apply the same emoji mapping as `/job-track` (📄 applied · 📬 submitted · 💼 interview · 🎯 offer · ❌ rejected · 🚫 blocked · 🚪 withdrawn). Unknown statuses get no emoji.
 
 If you want the current statuses for real, read them from the local CSV (cheap, no network) — the user can spot obvious mistakes before the sheet mutation.
 

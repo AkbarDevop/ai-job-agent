@@ -55,8 +55,16 @@ Sort by urgency (overdue → due → soon → waiting), then by `days_since` des
 
 | # | Urgency | Days since | Company | Name | Round | Subject (original) | Sent |
 |---|---------|-----------:|---------|------|------:|--------------------|------|
-| 1 | overdue | 12 | GFT Infrastructure | Paul Young | 1/2 | Intern interest — substation… | 2026-04-10 |
-| 2 | due | 7 | Worley | Zulfiya Vafaeva | 1/2 | Savolim bor — GL intern… | 2026-04-15 |
+| 1 | 🚨 overdue | 12 | GFT Infrastructure | Paul Young | 1/2 | Intern interest — substation… | 2026-04-10 |
+| 2 | ⏰ due | 7 | Worley | Zulfiya Vafaeva | 1/2 | Savolim bor — GL intern… | 2026-04-15 |
+| 3 | 👀 soon | 5 | Masdar | Ali Al-Maktoum | 1/2 | Energy intern from Mizzou… | 2026-04-17 |
+| 4 | 💤 waiting | 2 | Plug and Play | Muhammad Mahmudov | 1/2 | Tashkent program interest… | 2026-04-20 |
+
+Emoji mapping (keep consistent across runs):
+- 🚨 overdue (`days_since > 10`)
+- ⏰ due (`days_since ≥ 7`)
+- 👀 soon (`days_since ≥ 5`)
+- 💤 waiting (otherwise)
 
 `Round` = `(follow_up_count + 1) / 2` (i.e. "this would be follow-up 1 of 2 max").
 
@@ -100,9 +108,9 @@ Loop through the `overdue` + `due` rows, one at a time. For each:
 | Field | Value |
 |-------|------:|
 | Contacts reviewed | N |
-| Follow-ups sent | N |
-| Skipped | N |
-| Still pending | N (see table) |
+| ✉️ Follow-ups sent | N |
+| ⏭️ Skipped | N |
+| ⏸️ Still pending | N (see table) |
 
 ## Handling `In-Reply-To` threading
 

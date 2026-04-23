@@ -36,15 +36,16 @@ If the file doesn't exist, tell the user to run `bash setup.sh` (which creates i
 
 | Status | Count |
 |--------|------:|
-| applied | N |
-| submitted | N |
-| interview | N |
-| offer | N |
-| rejected | N |
-| blocked | N |
+| 📄 applied | N |
+| 📬 submitted | N |
+| 💼 interview | N |
+| 🎯 offer | N |
+| ❌ rejected | N |
+| 🚫 blocked | N |
+| 🚪 withdrawn | N |
 | **total** | **N** |
 
-Use whatever statuses are actually present in the CSV — don't hardcode the list.
+Use whatever statuses are actually present in the CSV — don't hardcode the list. Apply this emoji mapping for known statuses (case-insensitive match); unknown statuses get no emoji. If a status is missing from the CSV entirely, don't include that row.
 
 ### 3. Recent activity table (last 10 rows by date)
 

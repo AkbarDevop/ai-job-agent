@@ -169,12 +169,12 @@ Print:
 
 | Field | Value |
 |-------|-------|
-| To | `Paul Young <paul.young@gft.com>` |
-| Subject | `…` |
-| Message-ID | `<…>` |
-| Sent | `2026-04-22T23:11:00Z` |
-| Body saved to | `outreach/2026-04-22-gft-paul-young.txt` |
-| Logged | `outreach-log.csv` (row N) |
+| ✉️ To | `Paul Young <paul.young@gft.com>` |
+| 📝 Subject | `…` |
+| 🔗 Message-ID | `<…>` |
+| ⏱️ Sent | `2026-04-22T23:11:00Z` |
+| 💾 Body saved to | `outreach/2026-04-22-gft-paul-young.txt` |
+| 📒 Logged | `outreach-log.csv` (row N) |
 
 Then nudge: *"Want me to draft another for a different person at the same company?"* — don't auto-do, wait.
 

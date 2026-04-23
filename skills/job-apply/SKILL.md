@@ -84,9 +84,11 @@ Show the user a compact markdown table:
 | Company | … |
 | Role | … |
 | Platform | LinkedIn / Greenhouse / Lever / Jobvite / Ashby |
-| Result | Submitted / Dry-run filled / Blocked / CAPTCHA |
+| Result | ✅ submitted / ⏳ dry-run filled / 🚫 blocked / 🤖 captcha / 💥 crash |
 | Exit code | 0 / 1 / 2 / 3 / 4 |
 | URL | `<url>` |
+
+Pick the single emoji that matches the exit code, don't list all four — one of ✅ ⏳ 🚫 🤖 💥 in the `Result` cell.
 
 Then ask: "Log this to the tracker? (y/n)" — if yes, append a row to `application-tracker.csv` with the columns in `templates/tracker.template.csv`, then optionally kick off `/job-track` to sync.
 

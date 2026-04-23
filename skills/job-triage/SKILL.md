@@ -69,19 +69,20 @@ Run each `text` through these regex rules **in order — first match wins**:
 
 | Class | Count | Unread |
 |-------|------:|------:|
-| interview_invite | N | N |
-| action_required | N | N |
-| rejection | N | N |
-| confirmation | N | N |
-| recruiter_outreach | N | N |
-| other | N | N |
+| 💼 interview_invite | N | N |
+| ⏰ action_required | N | N |
+| ❌ rejection | N | N |
+| ✅ confirmation | N | N |
+| 👤 recruiter_outreach | N | N |
+| 💤 other | N | N |
 | **total** | **N** | **N** |
 
 ### 4. Render detail table (first 20)
 
 | # | Class | Unread | Subject / preview |
 |---|-------|:------:|-------------------|
-| 0 | rejection | ● | "Regarding your application at Acme — unfortunately..." |
+| 0 | ❌ rejection | ● | "Regarding your application at Acme — unfortunately..." |
+| 1 | 💼 interview_invite | ● | "Phone screen — 30 min Tuesday at 2pm CT?" |
 
 Keep each row ≤ 120 chars.
 
