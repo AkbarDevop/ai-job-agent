@@ -19,6 +19,8 @@ Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). 
 | `/job-track [sync]` | local CSV + `google-sheet-sync.py` | counts-by-status table + recent activity |
 | `/job-triage [query]` | `outlook-triage.js` | classified-email counts + preview table, step-through extract/mark-read |
 | `/job-status <updates.json>` | `tracker-status-update.py` | before/after diff, confirmation prompt, result summary |
+| `/job-outreach <target>` | `send-cold-email.js` + Claude (the agent drafts) | research → draft preview → dry-run → send → log to `outreach-log.csv` |
+| `/job-followup [send]` | `outreach-log.csv` + `send-cold-email.js` | urgency table (overdue/due/soon/waiting) + optional step-through send |
 
 Skills find this repo via `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`. Set the env var or rerun `install.sh` from a non-default clone location.
 
@@ -116,7 +118,8 @@ python3 scripts/tracker-status-update.py updates.json
 | `scripts/jobvite-apply.js` | Jobvite ATS | Job URL + form config JSON |
 | `scripts/ashby-apply.js` | Ashby ATS | Job URL + form config JSON |
 | `scripts/outlook-triage.js` | Email search/read/mark | Command + query/index |
-| `scripts/outlook-send.js` | Send email | To + subject + body file |
+| `scripts/outlook-send.js` | Send email (Outlook Web via CDP) | To + subject + body file |
+| `scripts/send-cold-email.js` | Send cold email (Gmail via msmtp) | JSON payload on stdin or path |
 | `scripts/google-sheet-sync.py` | Append to Google Sheet | CSV file path |
 | `scripts/tracker-status-update.py` | Batch status update | JSON file path |
 

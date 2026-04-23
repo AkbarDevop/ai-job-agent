@@ -186,6 +186,83 @@ export SHEET_NAME="Job Tracker"
 
 Or edit the defaults at the top of `scripts/google-sheet-sync.py` and `scripts/tracker-status-update.py`.
 
+## Cold Email Setup (msmtp + Gmail)
+
+Required only for `/job-outreach` and `/job-followup`. Skip this section if you're only using ATS fillers and Outlook triage.
+
+### 1. Install msmtp
+
+```bash
+# macOS
+brew install msmtp
+
+# Debian / Ubuntu
+sudo apt install msmtp msmtp-mta
+
+# Arch
+sudo pacman -S msmtp
+```
+
+Verify: `command -v msmtp` should print a path.
+
+### 2. Create a Gmail App Password
+
+Gmail requires an app password for SMTP (your regular password won't work with 2FA on). 
+
+1. Go to https://myaccount.google.com/apppasswords (requires 2-Step Verification to be on).
+2. Generate a new app password. Label it "msmtp" or similar.
+3. Copy the 16-character password. You won't see it again.
+
+### 3. Write `~/.msmtprc`
+
+```ini
+defaults
+auth           on
+tls            on
+tls_trust_file /etc/ssl/cert.pem
+logfile        ~/.msmtp.log
+
+account        gmail
+host           smtp.gmail.com
+port           587
+from           you@gmail.com
+user           you@gmail.com
+password       your-16-char-app-password
+
+account default : gmail
+```
+
+On macOS the `tls_trust_file` path may be `/opt/homebrew/etc/openssl@3/cert.pem` — check with `ls /etc/ssl/cert.pem` first.
+
+Tighten permissions (msmtp refuses to start if the file is world-readable):
+
+```bash
+chmod 600 ~/.msmtprc
+```
+
+### 4. Test it
+
+```bash
+echo "Subject: msmtp test
+
+hello from msmtp" | msmtp your-test@example.com
+```
+
+If the email arrives, you're done. If not, check `~/.msmtp.log`.
+
+### 5. Dry-run the bundled sender
+
+```bash
+echo '{
+  "from": "You <you@gmail.com>",
+  "to": "test@example.com",
+  "subject": "dry-run",
+  "body": "hello"
+}' | node scripts/send-cold-email.js --dry-run
+```
+
+You should see a JSON block with `ok: true`, `dryRun: true`, and the raw RFC822 preview. No email is actually sent on `--dry-run`.
+
 ## Outlook Email Integration
 
 The Outlook scripts connect to a running Chrome instance via Chrome DevTools Protocol.

@@ -246,6 +246,8 @@ bash skills/install.sh   # one-time — symlinks the skills into ~/.claude/skill
 | `/job-track [sync]` | Show your local tracker grouped by status. Pass `sync` to push new rows to Google Sheets. |
 | `/job-triage [query]` | Search Outlook Web, classify results (rejection / interview / confirmation / …), step through extract/mark-read. |
 | `/job-status <updates.json>` | Batch-update statuses in both the Google Sheet and local CSV. Diffs before applying. |
+| `/job-outreach <target>` | Research a company or hiring manager, draft a personalized cold email in chat, approve, and send via your local msmtp. Logs to `outreach-log.csv`. The agent itself is the LLM — no external API. |
+| `/job-followup [send]` | Walk the day-7 follow-ups. Reads `outreach-log.csv`, computes urgency (max 2 follow-ups per contact per career-ops cadence), drafts and sends one at a time. |
 
 Each skill is just a markdown file at `skills/<name>/SKILL.md` — open one to see exactly what the agent is told to do. The skills render results as markdown tables so you can see what happened at a glance.
 
@@ -293,7 +295,8 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- jobvite-apply.js               # Jobvite ATS automation
 |   |-- ashby-apply.js                 # Ashby ATS automation
 |   |-- outlook-triage.js              # Outlook inbox search and triage
-|   |-- outlook-send.js                # Outlook email composer
+|   |-- outlook-send.js                # Outlook email composer (CDP)
+|   |-- send-cold-email.js             # Cold-email sender (msmtp)
 |   |-- google-sheet-sync.py           # Google Sheets tracker sync
 |   +-- tracker-status-update.py       # Batch status updater
 |-- skills/
@@ -302,10 +305,13 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- job-track/SKILL.md             # /job-track — tracker + sheet sync
 |   |-- job-triage/SKILL.md            # /job-triage — Outlook search + classify
 |   |-- job-status/SKILL.md            # /job-status — batch status updates
+|   |-- job-outreach/SKILL.md          # /job-outreach — cold email via msmtp
+|   |-- job-followup/SKILL.md          # /job-followup — day-7 cadence
 |   +-- README.md                      # bundled + community skills guide
 |-- templates/
 |   |-- daily-log.template.md          # Daily submission log template
 |   |-- tracker.template.csv           # CSV tracker headers
+|   |-- outreach-log.template.csv      # Cold-email log headers
 |   +-- interview-prep.template.md     # Interview prep template
 +-- docs/
     |-- SETUP.md                       # Detailed setup guide
