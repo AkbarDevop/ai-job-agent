@@ -16,13 +16,11 @@ The onboarding skill. Replaces `bash wizard.sh` with an in-chat conversation —
 
 ## Repo location
 
-`$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`. If none exist, the user hasn't cloned the repo yet — tell them to run:
+`$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/` → REPO_PATH marker file → `~/ai-job-agent/`. If none of these exists, the user hasn't cloned the repo yet — tell them to paste this into their Claude Code session:
 
-```bash
-gh repo clone AkbarDevop/ai-job-agent
-```
+> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then tell me it's done and run /job-setup.
 
-and rerun `/job-setup`.
+and rerun `/job-setup` after the install finishes.
 
 ## State inspection (always first)
 

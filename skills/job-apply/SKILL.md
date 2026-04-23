@@ -17,10 +17,11 @@ Fills out a job application form on the 5 ATS platforms this repo supports. Defa
 Resolve the repo root in this order:
 
 1. `$AI_JOB_AGENT_ROOT` env var
-2. `~/.claude/skills/ai-job-agent/REPO_PATH` (written by `install.sh`)
-3. `~/ai-job-agent` (the default clone target)
+2. `~/.claude/skills/ai-job-agent/` (gstack-style install — recommended)
+3. `~/.claude/skills/ai-job-agent/REPO_PATH` file (legacy, when repo is elsewhere)
+4. `~/ai-job-agent/` (legacy manual-clone fallback)
 
-Fail with a clear message if none of these exist.
+Check for `package.json` in the candidate path to confirm it's really the repo. Fail with a clear message if none exist.
 
 ## Workflow
 

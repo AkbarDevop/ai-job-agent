@@ -18,7 +18,7 @@ This is the pattern behind the 228+ cold emails that led to the GFT offer in 12 
 
 ## Repo location
 
-`$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`.
+`$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/` → REPO_PATH marker file → `~/ai-job-agent/`.
 
 ## Prerequisites
 

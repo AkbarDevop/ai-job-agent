@@ -51,59 +51,38 @@ I'm open-sourcing the whole thing because nobody should have to type their gradu
 
 ---
 
-## Get Started in 5 Minutes
+## Install — 30 seconds
 
-### Option 1: `/job-setup` inside Claude Code (recommended)
+Requirements: [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Git, Node.js 18+. msmtp is optional — only needed if you want the cold-email skills.
+
+**Open Claude Code and paste this:**
+
+> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md that says to use the bundled skills for all job-search work — `/job-setup` for onboarding, `/job-apply <url>` for ATS forms, `/job-outreach <target>` for cold emails via msmtp, `/job-followup` for day-7 nudges, `/job-track` for the tracker, `/job-triage` for Outlook, `/job-status <updates.json>` for bulk status flips, `/job-dashboard` for the terminal TUI. Tell me when it's done, then run /job-setup so I can walk through profile, resume, and optional Gmail app password for cold email.
+
+Claude does the rest — clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills globally, updates your CLAUDE.md, then drops you into `/job-setup` to collect profile + resume + optional cold-email config.
+
+Once installed, the skills work **from any directory** in any Claude Code session. You don't `cd` anywhere. You don't run a bash wizard. You just type:
+
+```
+/job-apply https://linkedin.com/jobs/view/1234567890
+/job-outreach "VP Substation Engineering at GFT"
+/job-followup
+/job-dashboard
+```
+
+### Want to hack on the skills?
+
+If you're modifying the skill prompts or scripts, clone normally and the `install.sh` handles it:
 
 ```bash
-git clone https://github.com/AkbarDevop/ai-job-agent.git
-cd ai-job-agent
-claude                  # open Claude Code in the repo
+git clone https://github.com/AkbarDevop/ai-job-agent ~/wherever
+cd ~/wherever
+bash skills/install.sh   # writes a REPO_PATH marker; skills find this clone
 ```
 
-Then type:
+### No Claude Code? (legacy)
 
-```
-/job-setup
-```
-
-Claude walks you through the whole onboarding in chat — no bash wizard, no JSON editing:
-
-```
-Step 1:  The Basics      → name, email, phone, location
-Step 2:  Education       → school, major, GPA, graduation, degree type
-Step 3:  Work Auth       → visa status (auto-fills sponsorship logic)
-Step 4:  EEO Demographics → optional gender/race for EEO forms
-Step 5:  Resume          → point to your PDF (paste the path)
-Step 6:  Chrome Cookies  → auto-detects, asks if different
-Step 7:  Cold email      → optional — msmtp + Gmail App Password walkthrough
-Step 8:  Generate configs → writes every file
-Step 9:  Install deps + register skills (npm install + bash skills/install.sh)
-```
-
-At the end all 7 bundled skills are live. Try `/job-apply <url>`, `/job-outreach <target>`, `/job-track` right away.
-
-### Option 2: Interactive bash wizard (no Claude Code)
-
-```bash
-git clone https://github.com/AkbarDevop/ai-job-agent.git
-cd ai-job-agent
-bash wizard.sh
-```
-
-Same questions as `/job-setup`, just driven by a bash script. Stops short of registering the skills (since you're not using Claude Code).
-
-### Option 3: Fully manual
-
-```bash
-git clone https://github.com/AkbarDevop/ai-job-agent.git
-cd ai-job-agent
-bash setup.sh
-
-cp config/linkedin-config.template.json config/linkedin-config.json
-cp config/candidate-profile.template.md config/candidate-profile.md
-$EDITOR config/linkedin-config.json
-```
+You can still drive it as standalone CLI tools — `bash wizard.sh` for interactive config, then call `node scripts/linkedin-easy-apply.js <url>` etc. directly. See [docs/SETUP.md](docs/SETUP.md#installation) for the full bash-first path.
 
 ### Apply to Your First Job
 

@@ -33,25 +33,28 @@ This guide walks through every step of setting up the AI Job Application Agent t
 
 ## Installation
 
-### Option A: `/job-setup` inside Claude Code (Recommended)
+### Option A: Paste-to-Claude (Recommended, gstack-style)
+
+Open Claude Code and paste this (one line, Claude interprets the rest):
+
+> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then run /job-setup.
+
+Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills globally, and walks you through `/job-setup`: identity → education → work auth → EEO → resume → Chrome cookies → optional msmtp. Single message in, fully configured out.
+
+**Skip the rest of this page if you take this route** — the skills handle it all. The sections below are reference material if something needs manual repair.
+
+### Option B: Clone-and-hack (if you're modifying the skill files)
 
 ```bash
-git clone https://github.com/AkbarDevop/ai-job-agent.git
-cd ai-job-agent
-claude
+git clone https://github.com/AkbarDevop/ai-job-agent ~/wherever
+cd ~/wherever
+bash skills/install.sh      # symlinks skills into ~/.claude/skills/ and
+                            # writes a REPO_PATH marker so they find this clone
+claude                      # start Claude Code anywhere
+/job-setup                  # inside the session
 ```
 
-Then in the Claude Code session:
-
-```
-/job-setup
-```
-
-Claude walks you through identity → education → work auth → EEO → resume → Chrome cookies → optional msmtp for cold email, writes every config file, runs `npm install`, and registers all 7 bundled skills. Single command, everything in chat.
-
-Skip the rest of this page if you take this route — the skill handles it all. The sections below are reference material if something needs manual repair.
-
-### Option B: Bash Wizard (no Claude Code required)
+### Option C: Bash Wizard (no Claude Code required)
 
 ```bash
 git clone https://github.com/AkbarDevop/ai-job-agent.git
@@ -59,23 +62,18 @@ cd ai-job-agent
 bash wizard.sh
 ```
 
-Same questions as `/job-setup`, driven by a terminal wizard instead of a chat. Stops short of registering the skills (since you're not using Claude Code) and does not configure msmtp for cold email.
+Same questions as `/job-setup`, driven by a terminal wizard. Does not register the skills or configure msmtp for cold email.
 
-### Option C: Fully Manual
+### Option D: Fully Manual
 
 ```bash
 git clone https://github.com/AkbarDevop/ai-job-agent.git
 cd ai-job-agent
 bash setup.sh
 
-# Install Node.js dependencies (setup.sh handles this too)
 npm init -y
 npm install playwright-core
-
-# Install Playwright browsers (optional - you can use system Chrome instead)
-npx playwright install chromium
-
-# Install Python dependencies
+npx playwright install chromium   # optional
 pip3 install browser-cookie3
 ```
 

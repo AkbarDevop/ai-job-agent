@@ -126,8 +126,15 @@ function truncate(s, max) {
 // --------------------------------------------------------------------------
 
 function resolveRepoRoot() {
+  // Priority order:
+  //   1. $AI_JOB_AGENT_ROOT       explicit override
+  //   2. ~/.claude/skills/ai-job-agent   gstack-style install (recommended)
+  //   3. ~/.claude/skills/ai-job-agent/REPO_PATH   marker file (legacy)
+  //   4. ~/ai-job-agent           fallback for manual clones
+  //   5. walk up from this script  last resort
   const candidates = [
     process.env.AI_JOB_AGENT_ROOT,
+    path.join(os.homedir(), '.claude/skills/ai-job-agent'),
     readMarker(),
     path.join(os.homedir(), 'ai-job-agent'),
   ].filter(Boolean);
@@ -135,7 +142,6 @@ function resolveRepoRoot() {
   for (const c of candidates) {
     if (fs.existsSync(path.join(c, 'package.json'))) return c;
   }
-  // Last resort: walk up from this script's location
   let dir = path.dirname(new URL(import.meta.url).pathname);
   for (let i = 0; i < 5; i += 1) {
     if (fs.existsSync(path.join(dir, 'package.json'))) return dir;

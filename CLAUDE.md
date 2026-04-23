@@ -24,7 +24,11 @@ Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). 
 | `/job-followup [send]` | `outreach-log.csv` + `send-cold-email.js` | urgency table (overdue/due/soon/waiting) + optional step-through send |
 | `/job-dashboard [live]` | `job-dashboard.mjs` (zero deps) | ANSI tables: applications + outreach + follow-ups. Snapshot in chat or `npm run dashboard` for live TUI |
 
-**First-run flow:** open Claude Code in the repo, type `/job-setup`, answer the questions. Everything else is live after that. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users but the skill path is the recommended one.
+**First-run flow (gstack-style):** open Claude Code anywhere and paste:
+
+> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then run /job-setup.
+
+Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills as symlinks under `~/.claude/skills/`, and runs `/job-setup` for identity + resume + optional msmtp. No `cd` required ever; the skills work from any directory in any session. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users.
 
 Skills find this repo via `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`. Set the env var or rerun `install.sh` from a non-default clone location.
 

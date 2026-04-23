@@ -14,7 +14,7 @@ Wraps `scripts/tracker-status-update.py`. Shows a diff of what will change, asks
 
 ## Repo location
 
-Same as `/job-apply`: `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`.
+Same as `/job-apply`: `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/` → REPO_PATH marker file → `~/ai-job-agent/`.
 
 ## Input JSON format
 

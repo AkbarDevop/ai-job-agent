@@ -91,7 +91,7 @@ If you cloned this repo somewhere other than `~/ai-job-agent`, either:
 - Re-run `bash skills/install.sh` from wherever the repo actually lives (it records the path), or
 - Set `AI_JOB_AGENT_ROOT` in your shell environment.
 
-The skills resolve the root in this order: `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`.
+The skills resolve the root in this order: `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/` (gstack-style install) → `~/.claude/skills/ai-job-agent/REPO_PATH` marker file → `~/ai-job-agent/`.
 
 ---
 

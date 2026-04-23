@@ -3,6 +3,15 @@
 # Register the bundled ai-job-agent skills with Claude Code by symlinking
 # them into ~/.claude/skills/. Re-run any time to refresh. Idempotent.
 #
+# Two supported install locations:
+#   1. Repo lives at ~/.claude/skills/ai-job-agent/     (gstack-style, recommended)
+#   2. Repo lives anywhere else, e.g. ~/ai-job-agent/   (legacy)
+#
+# In both cases the skills get symlinked as ~/.claude/skills/<name>.
+# In case 1 the repo IS the marker dir and we skip writing REPO_PATH
+# (the location is obvious). In case 2 we write a REPO_PATH marker file
+# so the scripts can find the repo regardless of cwd.
+#
 # Usage:
 #   bash skills/install.sh           # install all bundled skills
 #   bash skills/install.sh --uninstall   # remove the symlinks
@@ -14,6 +23,14 @@ SKILLS_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SKILLS_DIR/.." && pwd)"
 TARGET_ROOT="${HOME}/.claude/skills"
 MARKER_DIR="${TARGET_ROOT}/ai-job-agent"
+
+# Detect the gstack-style install: repo lives AT the marker dir. In that case
+# we must not rm -rf the marker dir during uninstall (that would nuke the
+# repo), and writing REPO_PATH inside the repo is redundant.
+REPO_IS_MARKER=0
+if [ "$REPO_ROOT" = "$MARKER_DIR" ]; then
+  REPO_IS_MARKER=1
+fi
 
 BUNDLED=(job-setup job-apply job-track job-triage job-status job-outreach job-followup job-dashboard)
 
@@ -30,9 +47,13 @@ uninstall() {
       fi
     fi
   done
-  if [ -d "$MARKER_DIR" ]; then
+  # Only remove the marker dir if the repo does NOT live inside it.
+  if [ "$REPO_IS_MARKER" -eq 0 ] && [ -d "$MARKER_DIR" ]; then
     rm -rf "$MARKER_DIR"
     echo "removed: $MARKER_DIR"
+  elif [ "$REPO_IS_MARKER" -eq 1 ]; then
+    echo "note: repo lives at $MARKER_DIR — skipping rm to avoid wiping the clone."
+    echo "      delete the repo manually with: rm -rf $MARKER_DIR"
   fi
   echo "Uninstall complete."
 }
@@ -43,11 +64,14 @@ if [ "${1:-}" = "--uninstall" ]; then
 fi
 
 mkdir -p "$TARGET_ROOT"
-mkdir -p "$MARKER_DIR"
 
-# Record the repo path so each skill can find the scripts regardless of cwd.
-printf '%s\n' "$REPO_ROOT" > "${MARKER_DIR}/REPO_PATH"
-echo "wrote: ${MARKER_DIR}/REPO_PATH -> $REPO_ROOT"
+if [ "$REPO_IS_MARKER" -eq 1 ]; then
+  echo "repo is at $MARKER_DIR (gstack-style) — skipping REPO_PATH marker file"
+else
+  mkdir -p "$MARKER_DIR"
+  printf '%s\n' "$REPO_ROOT" > "${MARKER_DIR}/REPO_PATH"
+  echo "wrote: ${MARKER_DIR}/REPO_PATH -> $REPO_ROOT"
+fi
 
 installed=()
 skipped=()

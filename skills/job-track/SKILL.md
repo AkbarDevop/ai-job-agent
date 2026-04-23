@@ -14,7 +14,7 @@ Reads the local CSV tracker and renders it as a markdown table grouped by status
 
 ## Repo location
 
-Same resolution as `/job-apply`: `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`.
+Same resolution as `/job-apply`: `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/` → REPO_PATH marker file → `~/ai-job-agent/`.
 
 ## Tracker location
 

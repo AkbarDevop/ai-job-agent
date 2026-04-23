@@ -13,7 +13,7 @@ Thin wrapper around `scripts/outlook-triage.js` that runs a search, classifies r
 
 ## Repo location
 
-Same resolution as `/job-apply`: `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`.
+Same resolution as `/job-apply`: `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/` → REPO_PATH marker file → `~/ai-job-agent/`.
 
 ## Prerequisites
 
