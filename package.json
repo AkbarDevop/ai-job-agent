@@ -10,7 +10,9 @@
     "jobvite": "node scripts/jobvite-apply.js",
     "ashby": "node scripts/ashby-apply.js",
     "triage": "node scripts/outlook-triage.js",
-    "send": "node scripts/outlook-send.js"
+    "send": "node scripts/outlook-send.js",
+    "dashboard": "node scripts/job-dashboard.mjs",
+    "dashboard:snapshot": "node scripts/job-dashboard.mjs --snapshot"
   },
   "dependencies": {
     "playwright-core": "^1.40.0"

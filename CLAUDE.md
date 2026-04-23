@@ -22,6 +22,7 @@ Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). 
 | `/job-status <updates.json>` | `tracker-status-update.py` | before/after diff, confirmation prompt, result summary |
 | `/job-outreach <target>` | `send-cold-email.js` + Claude (the agent drafts) | research → draft preview → dry-run → send → log to `outreach-log.csv` |
 | `/job-followup [send]` | `outreach-log.csv` + `send-cold-email.js` | urgency table (overdue/due/soon/waiting) + optional step-through send |
+| `/job-dashboard [live]` | `job-dashboard.mjs` (zero deps) | ANSI tables: applications + outreach + follow-ups. Snapshot in chat or `npm run dashboard` for live TUI |
 
 **First-run flow:** open Claude Code in the repo, type `/job-setup`, answer the questions. Everything else is live after that. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users but the skill path is the recommended one.
 
@@ -123,6 +124,7 @@ python3 scripts/tracker-status-update.py updates.json
 | `scripts/outlook-triage.js` | Email search/read/mark | Command + query/index |
 | `scripts/outlook-send.js` | Send email (Outlook Web via CDP) | To + subject + body file |
 | `scripts/send-cold-email.js` | Send cold email (Gmail via msmtp) | JSON payload on stdin or path |
+| `scripts/job-dashboard.mjs` | Terminal dashboard (TUI + snapshot) | Reads CSVs; `--snapshot` for one-shot |
 | `scripts/google-sheet-sync.py` | Append to Google Sheet | CSV file path |
 | `scripts/tracker-status-update.py` | Batch status update | JSON file path |
 

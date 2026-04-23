@@ -1,6 +1,6 @@
 # Claude Code Skills for Job Hunting
 
-This toolkit ships with 7 bundled skills that wrap the scripts in `scripts/` so you can drive the whole flow from inside a Claude Code session. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with 8 bundled skills that wrap the scripts in `scripts/` so you can drive the whole flow from inside a Claude Code session. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
 
 ---
 
@@ -31,6 +31,19 @@ These live inside this repo at `skills/<name>/SKILL.md` and wrap the existing No
 | `/job-followup [send]` | Read `outreach-log.csv`, compute urgency using a 7-day cadence, walk follow-ups one at a time. Max 2 follow-ups per contact. | `outreach-log.csv` + `send-cold-email.js` |
 
 See `docs/SETUP.md#cold-email-setup-msmtp--gmail` for manual msmtp configuration — or just run `/job-setup` and answer "yes" when it asks about cold email.
+
+### Terminal dashboard
+
+| Skill | What it does | Wraps |
+|-------|--------------|-------|
+| `/job-dashboard [live]` | Show applications + outreach + follow-ups as a rich ANSI-colored terminal dashboard. Default is an in-chat snapshot; `live` prints the command to launch the interactive TUI (tabs, arrow-key navigation, live reload) in a separate terminal tab. | `job-dashboard.mjs` (zero deps — pure Node ANSI + Unicode box chars) |
+
+Standalone use (outside Claude Code):
+
+```bash
+npm run dashboard            # interactive TUI
+npm run dashboard:snapshot   # one-shot snapshot
+```
 
 ### Install the bundled skills
 

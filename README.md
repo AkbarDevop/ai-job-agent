@@ -250,7 +250,7 @@ See [docs/SETUP.md](docs/SETUP.md) for a detailed walkthrough.
 
 ## Claude Code Skills
 
-This toolkit ships with **7 bundled skills** that turn the scripts above into slash commands inside any Claude Code session. It also pairs well with 27+ community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with **8 bundled skills** that turn the scripts above into slash commands inside any Claude Code session. It also pairs well with 27+ community-built skills for resume tailoring, interview prep, and more.
 
 ### Bundled skills (built in)
 
@@ -269,6 +269,7 @@ bash skills/install.sh   # one-time — symlinks the skills into ~/.claude/skill
 | `/job-status <updates.json>` | Batch-update statuses in both the Google Sheet and local CSV. Diffs before applying. |
 | `/job-outreach <target>` | Research a company or hiring manager, draft a personalized cold email in chat, approve, and send via your local msmtp. Logs to `outreach-log.csv`. The agent itself is the LLM — no external API. |
 | `/job-followup [send]` | Walk the day-7 follow-ups. Reads `outreach-log.csv`, computes urgency (max 2 follow-ups per contact per career-ops cadence), drafts and sends one at a time. |
+| `/job-dashboard [live]` | ANSI-colored terminal dashboard — applications + outreach + follow-ups in one view. Snapshot in chat by default; `live` gives you the command for the interactive TUI (tabs, arrow-key nav, live reload) in a separate terminal tab. Zero deps. |
 
 Each skill is just a markdown file at `skills/<name>/SKILL.md` — open one to see exactly what the agent is told to do. The skills render results as markdown tables so you can see what happened at a glance.
 
@@ -318,6 +319,7 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- outlook-triage.js              # Outlook inbox search and triage
 |   |-- outlook-send.js                # Outlook email composer (CDP)
 |   |-- send-cold-email.js             # Cold-email sender (msmtp)
+|   |-- job-dashboard.mjs              # Terminal TUI + snapshot dashboard
 |   |-- google-sheet-sync.py           # Google Sheets tracker sync
 |   +-- tracker-status-update.py       # Batch status updater
 |-- skills/
@@ -329,6 +331,7 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- job-status/SKILL.md            # /job-status — batch status updates
 |   |-- job-outreach/SKILL.md          # /job-outreach — cold email via msmtp
 |   |-- job-followup/SKILL.md          # /job-followup — day-7 cadence
+|   |-- job-dashboard/SKILL.md         # /job-dashboard — TUI + snapshot
 |   +-- README.md                      # bundled + community skills guide
 |-- templates/
 |   |-- daily-log.template.md          # Daily submission log template
