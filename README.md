@@ -232,13 +232,30 @@ See [docs/SETUP.md](docs/SETUP.md) for a detailed walkthrough.
 
 ## Claude Code Skills
 
-This toolkit becomes significantly more powerful when paired with [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Community-built skills add AI-assisted job search, resume tailoring, interview prep, and more.
+This toolkit ships with **4 bundled skills** that turn the scripts above into slash commands inside any Claude Code session. It also pairs well with 27+ community-built skills for resume tailoring, interview prep, and more.
 
-**Highlights**:
+### Bundled skills (built in)
+
+```bash
+bash skills/install.sh   # one-time — symlinks the skills into ~/.claude/skills/
+```
+
+| Skill | What it does |
+|-------|--------------|
+| `/job-apply <url>` | Apply to a job by URL. Auto-routes to the right ATS filler (LinkedIn / Greenhouse / Lever / Jobvite / Ashby). Dry-run by default; pass `--submit` to actually submit. |
+| `/job-track [sync]` | Show your local tracker grouped by status. Pass `sync` to push new rows to Google Sheets. |
+| `/job-triage [query]` | Search Outlook Web, classify results (rejection / interview / confirmation / …), step through extract/mark-read. |
+| `/job-status <updates.json>` | Batch-update statuses in both the Google Sheet and local CSV. Diffs before applying. |
+
+Each skill is just a markdown file at `skills/<name>/SKILL.md` — open one to see exactly what the agent is told to do. The skills render results as markdown tables so you can see what happened at a glance.
+
+### Community skills
+
+Highlights:
 
 - `/job-search` — search for jobs matching your resume across multiple boards
 - `/tailor-resume` — customize your resume for a specific job posting
-- `/apply` — fill out applications on Greenhouse, Lever, and Workday
+- `/apply` — AI-assisted ATS form filling (complements the bundled `/job-apply`)
 - `/interview-prep-generator` — generate STAR stories and practice questions
 - `/resume-ats-optimizer` — optimize your resume for Applicant Tracking Systems
 - `/salary-negotiation-prep` — research market rates and build counter-offer scripts
@@ -280,7 +297,12 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- google-sheet-sync.py           # Google Sheets tracker sync
 |   +-- tracker-status-update.py       # Batch status updater
 |-- skills/
-|   +-- README.md                      # Recommended Claude Code skills
+|   |-- install.sh                     # register bundled skills into ~/.claude/skills/
+|   |-- job-apply/SKILL.md             # /job-apply — auto-routes ATS filler
+|   |-- job-track/SKILL.md             # /job-track — tracker + sheet sync
+|   |-- job-triage/SKILL.md            # /job-triage — Outlook search + classify
+|   |-- job-status/SKILL.md            # /job-status — batch status updates
+|   +-- README.md                      # bundled + community skills guide
 |-- templates/
 |   |-- daily-log.template.md          # Daily submission log template
 |   |-- tracker.template.csv           # CSV tracker headers

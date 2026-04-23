@@ -1,10 +1,63 @@
-# Recommended Claude Code Skills for Job Hunting
+# Claude Code Skills for Job Hunting
 
-This toolkit works great on its own, but it becomes significantly more powerful when paired with [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills. These community-built skills add AI-assisted resume tailoring, job search, interview prep, and more.
+This toolkit ships with 4 bundled skills that wrap the scripts in `scripts/` so you can drive the whole flow from inside a Claude Code session. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
 
-## Quick Install
+---
 
-Each skill is installed with a single command. Run these from your terminal.
+## Bundled Skills (Built-In)
+
+These live inside this repo at `skills/<name>/SKILL.md` and wrap the existing Node.js / Python scripts. They render results as markdown tables so you can see what happened at a glance.
+
+| Skill | What it does | Wraps |
+|-------|--------------|-------|
+| `/job-apply <url>` | Apply to a job via URL. Auto-routes to the right ATS filler, dry-run by default. | `linkedin-easy-apply.js`, `greenhouse-apply.js`, `lever-apply.js`, `jobvite-apply.js`, `ashby-apply.js` |
+| `/job-track [sync]` | Show the local tracker grouped by status. Optionally sync to Google Sheets. | `google-sheet-sync.py`, `application-tracker.csv` |
+| `/job-triage [query]` | Search Outlook, classify results (rejection / interview / confirmation / …), render counts + preview, step through extract / mark-read. | `outlook-triage.js` |
+| `/job-status <updates.json>` | Batch-update statuses in both the Google Sheet and local CSV. Shows diff, asks to confirm. | `tracker-status-update.py` |
+
+### Install the bundled skills
+
+From this repo root:
+
+```bash
+bash skills/install.sh
+```
+
+This symlinks each skill into `~/.claude/skills/` and writes your repo path to `~/.claude/skills/ai-job-agent/REPO_PATH` so the skills can find `scripts/` regardless of where you run Claude Code from.
+
+The script is idempotent — re-run it any time. To remove:
+
+```bash
+bash skills/install.sh --uninstall
+```
+
+### Try them
+
+Open a new Claude Code session and type one of:
+
+```
+/job-apply https://www.linkedin.com/jobs/view/1234567890
+/job-track
+/job-track sync
+/job-triage application status
+/job-status rejection-updates.json
+```
+
+Each skill is just a markdown file — read `skills/job-apply/SKILL.md` etc. to see exactly what the agent is being told to do.
+
+### Override the repo path
+
+If you cloned this repo somewhere other than `~/ai-job-agent`, either:
+- Re-run `bash skills/install.sh` from wherever the repo actually lives (it records the path), or
+- Set `AI_JOB_AGENT_ROOT` in your shell environment.
+
+The skills resolve the root in this order: `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`.
+
+---
+
+## Recommended Community Skills
+
+The skills below are *not* in this repo — they're installed from other sources with `claude install-skill <url>`. They complement the bundled skills above.
 
 ## Proficiently Claude Skills
 

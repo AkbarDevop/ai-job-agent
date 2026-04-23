@@ -4,6 +4,24 @@
 
 This is a job application automation toolkit. It automates filling and submitting applications on LinkedIn Easy Apply, Greenhouse, Lever, Jobvite, and Ashby, plus email triage and Google Sheets tracking.
 
+Two ways to drive it:
+
+1. **Bundled skills (recommended)** — type `/job-apply`, `/job-track`, `/job-triage`, or `/job-status` in any Claude Code session. Each skill wraps the scripts below and renders results as a markdown table. Install once with `bash skills/install.sh`.
+2. **Raw scripts** — call the Node.js / Python scripts in `scripts/` directly from your terminal (documented below).
+
+## Bundled Skills
+
+Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). Each skill's prompt lives at `skills/<name>/SKILL.md` — read it to see exactly what the agent does.
+
+| Skill | Wraps | Output |
+|-------|-------|--------|
+| `/job-apply <url> [--submit]` | 5 ATS fillers (auto-routed by URL host) | result table: platform, outcome, exit code |
+| `/job-track [sync]` | local CSV + `google-sheet-sync.py` | counts-by-status table + recent activity |
+| `/job-triage [query]` | `outlook-triage.js` | classified-email counts + preview table, step-through extract/mark-read |
+| `/job-status <updates.json>` | `tracker-status-update.py` | before/after diff, confirmation prompt, result summary |
+
+Skills find this repo via `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`. Set the env var or rerun `install.sh` from a non-default clone location.
+
 ## Configuration
 
 All personal details are in the `config/` directory:
@@ -126,18 +144,18 @@ All application scripts use consistent exit codes:
 | `LOCAL_TRACKER` | `application-tracker.csv` | Path to local CSV tracker |
 | `OUTLOOK_PORT` | `9224` | Chrome debug port for Outlook |
 
-## Recommended Skills
+## Recommended Companion Skills
 
-Install these Claude Code skills for enhanced job hunting:
+The skills below are community-built and complement the 4 bundled skills above:
 
 - `/job-search` -- Multi-board job search
 - `/tailor-resume` -- Resume customization per posting
-- `/apply` -- AI-assisted ATS form filling
+- `/apply` -- AI-assisted ATS form filling (different from bundled `/job-apply`, which wraps this repo's scripts directly)
 - `/interview-prep-generator` -- STAR stories and practice questions
 - `/resume-ats-optimizer` -- ATS keyword optimization
 - `/salary-negotiation-prep` -- Market rate research
 
-See `skills/README.md` for full list and install commands.
+See `skills/README.md` for the full list and install commands.
 
 ## File Locations
 
