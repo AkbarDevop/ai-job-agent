@@ -15,7 +15,8 @@ Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). 
 
 | Skill | Wraps | Output |
 |-------|-------|--------|
-| `/job-setup` | `wizard.sh` equivalent — but in chat | conversational onboarding, writes all configs, installs skills |
+| `/job-coach` | the persona — intake, research, slate, dispatch | target-role slate + next-move suggestions; persists to `config/search-plan.md` |
+| `/job-setup` | `wizard.sh` equivalent — but in chat | conversational onboarding, auto-reads user files, writes configs, registers skills |
 | `/job-apply <url> [--submit]` | 5 ATS fillers (auto-routed by URL host) | result table: platform, outcome, exit code |
 | `/job-track [sync]` | local CSV + `google-sheet-sync.py` | counts-by-status table + recent activity |
 | `/job-triage [query]` | `outlook-triage.js` | classified-email counts + preview table, step-through extract/mark-read |
@@ -26,9 +27,9 @@ Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). 
 
 **First-run flow (gstack-style):** open Claude Code anywhere and paste this one message:
 
-> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md that tells you to proactively route job-search talk through the bundled skills — job URL → /job-apply, reaching out to a person → /job-outreach, follow-ups → /job-followup, "how am I doing" → /job-dashboard, tracker → /job-track, status updates → /job-status, Outlook → /job-triage, setup or missing config → /job-setup. Tell me when done, then run /job-setup.
+> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md telling you to treat me like a career-coaching client — open-ended job-search talk → `/job-coach` (intake + research + slate), job URL → `/job-apply`, reaching out to a person → `/job-outreach`, follow-ups → `/job-followup`, "how am I doing" → `/job-dashboard`, tracker → `/job-track`, status updates → `/job-status`, Outlook → `/job-triage`, first-time setup → `/job-setup`. Never answer job-search questions conversationally — always dispatch. Tell me when done, then run /job-setup and chain into /job-coach intake.
 
-Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills as symlinks under `~/.claude/skills/`, writes the proactive-routing block into CLAUDE.md, and runs `/job-setup`. **After that, the user talks naturally** — "I want to apply to this url", "email the VP at X", "who should I follow up with", "how am I doing" — and Claude dispatches to the right skill. No `cd` required ever; skills work from any directory in any session. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users.
+Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 9 skills as symlinks under `~/.claude/skills/`, writes the coach-first routing block into CLAUDE.md, runs `/job-setup` (identity + resume + optional msmtp), and chains into `/job-coach intake` (target roles + companies + timeline → live market research → ranked slate of next moves). **After that, the user talks naturally** — "I want to apply to this url", "email the VP at X", "who should I follow up with", "how am I doing" — and Claude dispatches to the right skill. No `cd` required ever; skills work from any directory in any session. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users.
 
 Skills find this repo via `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`. Set the env var or rerun `install.sh` from a non-default clone location.
 

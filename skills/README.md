@@ -1,6 +1,6 @@
 # Claude Code Skills for Job Hunting
 
-This toolkit ships with 8 bundled skills that wrap the scripts in `scripts/` so you can drive the whole flow from inside a Claude Code session. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with 9 bundled skills — a persona-driven orchestrator (`/job-coach`) plus 8 verbs that do the actual work. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
 
 ---
 
@@ -8,7 +8,13 @@ This toolkit ships with 8 bundled skills that wrap the scripts in `scripts/` so 
 
 These live inside this repo at `skills/<name>/SKILL.md` and wrap the existing Node.js / Python scripts. They render results as markdown tables so you can see what happened at a glance.
 
-### Setup (do this first)
+### Orchestrator (the persona you talk to)
+
+| Skill | What it does |
+|-------|--------------|
+| `/job-coach` | Runs intake (target roles, companies, timeline, geography), researches the market visibly, presents a ranked slate of next moves, chains into the verb skills. Persists the plan to `config/search-plan.md` so every session picks up where the last one ended. Invoked by open-ended phrases ("help me find a job", "what should I do next") — doesn't hijack specific verb requests. |
+
+### Setup (do this after install, before `/job-coach`)
 
 | Skill | What it does |
 |-------|--------------|
@@ -63,27 +69,30 @@ bash skills/install.sh --uninstall
 
 ### Try them
 
-Open a new Claude Code session inside the repo. Start with:
+Open a new Claude Code session (anywhere). Start with:
 
 ```
-/job-setup
+/job-setup    # or just: "onboard me"
+/job-coach    # or just: "help me find a job"
 ```
 
 It asks for your name, school, work auth, resume path, Chrome cookies, and (optionally) walks you through Gmail App Password + msmtp for cold email. Writes every config file and registers every skill.
 
-Then any of:
+Then any of (you can also just **describe what you want** — skills auto-route):
 
 ```
-/job-apply https://www.linkedin.com/jobs/view/1234567890
-/job-track
-/job-track sync
-/job-triage application status
-/job-status rejection-updates.json
-/job-outreach "VP of Substation Engineering at GFT"
-/job-followup
+/job-coach                                                  # "help me find a job"
+/job-apply https://www.linkedin.com/jobs/view/1234567890    # or paste a URL
+/job-track                                                  # "show my tracker"
+/job-track sync                                             # "sync to sheets"
+/job-triage application status                              # "check my inbox"
+/job-status rejection-updates.json                          # "got rejected from X"
+/job-outreach "VP of Substation Engineering at GFT"         # "email the VP at GFT"
+/job-followup                                               # "who should I follow up with"
+/job-dashboard                                              # "how am I doing"
 ```
 
-Each skill is just a markdown file — read `skills/job-apply/SKILL.md` etc. to see exactly what the agent is being told to do.
+Each skill is just a markdown file — read `skills/job-coach/SKILL.md` etc. to see exactly what the agent is being told to do.
 
 ### Override the repo path
 

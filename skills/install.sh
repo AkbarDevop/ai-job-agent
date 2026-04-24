@@ -32,7 +32,7 @@ if [ "$REPO_ROOT" = "$MARKER_DIR" ]; then
   REPO_IS_MARKER=1
 fi
 
-BUNDLED=(job-setup job-apply job-track job-triage job-status job-outreach job-followup job-dashboard)
+BUNDLED=(job-coach job-setup job-apply job-track job-triage job-status job-outreach job-followup job-dashboard)
 
 uninstall() {
   for name in "${BUNDLED[@]}"; do

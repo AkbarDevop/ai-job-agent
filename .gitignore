@@ -27,5 +27,9 @@ submitted-applications-*.md
 outreach-log.csv
 outreach/
 
+# Coach's working plan (personal priorities, targets, constraints)
+config/search-plan.md
+
 # Chrome profiles
 chrome-data/
+package-lock.json

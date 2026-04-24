@@ -370,16 +370,23 @@ Report which dependencies installed and how many skills got registered.
 | 📄 Resume | `...` |
 | 🍪 Cookies | `...` |
 | ✉️ Cold email | ✅ configured / ⬜ skipped |
-| 🧩 Skills registered | N of 7 |
+| 🧩 Skills registered | N of 9 |
 
-Then the "try it out" nudge:
+### Step 11 — Chain into /job-coach (the real entry point)
+
+Profile setup alone isn't useful — the user needs a plan and a search loop. End by offering to kick straight into `/job-coach` intake:
+
+> All set. The agent knows who you are now. Next: we run `/job-coach intake` — a 5-minute interview about *what* you're looking for (roles, target companies, geography, timeline), I'll research the market in real time, and come back with a ranked list of concrete moves. Go? (y/n)
+
+On `y` → chain directly into `/job-coach intake`.
+On `n` → print the manual-command list as a fallback and end:
 
 ```
-Next:
-
-  /job-apply https://www.linkedin.com/jobs/view/1234567890   # dry-run an application
-  /job-outreach "VP of Engineering at Acme"                  # draft a cold email
-  /job-track                                                 # see your tracker
+Next (if you'd rather drive yourself):
+  /job-coach                       # or just say "help me find a job"
+  /job-apply https://…             # or just paste a job URL
+  /job-outreach "VP at Acme"       # or just say "email the VP at Acme"
+  /job-dashboard                   # or just say "how am I doing"
 ```
 
 ## Reconfigure flow

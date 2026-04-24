@@ -34,20 +34,30 @@ I'm open-sourcing the whole thing because nobody should have to type their gradu
 
 ---
 
-## What This Does
+## What this actually is
 
-| Capability | What It Automates |
-|-----------|------------------|
-| **LinkedIn Easy Apply** | Fills multi-step Easy Apply dialogs including work authorization, EEO, and screening questions |
-| **Greenhouse Apply** | Fills Greenhouse ATS application forms with React select support |
-| **Lever Apply** | Fills Lever ATS forms with location autocomplete and hCaptcha detection |
-| **Jobvite Apply** | Fills Jobvite applications including residence/consent gates |
-| **Ashby Apply** | Fills Ashby ATS forms with autocomplete and checkbox support |
-| **LinkedIn Networking** | Sends personalized connection requests to recruiters and professionals at target companies |
-| **Recruiter Follow-up** | Monitors connection acceptances and sends tailored follow-up DMs |
-| **Market Research** | Researches international job markets, identifies target companies, finds the right people |
-| **Outlook Triage** | Searches, reads, and manages job-related emails in Outlook Web |
-| **Google Sheet Sync** | Appends applications to a Google Sheet tracker from a local CSV |
+**A career coach you talk to inside Claude Code.** Not a CLI. Not a wizard. A persona.
+
+You install it once. You tell it you want an internship. It interviews you for 5 minutes (or reads your memory and skips the interview), researches the market live, comes back with a ranked slate of target roles + people, and drives every action from there. You don't memorize slash commands — you just talk:
+
+```
+> I need an EE internship for summer 2026, prefer US or Uzbekistan
+    (coach runs /job-coach — 5-min intake, then market research + slate)
+
+> Apply to #1 and #2, draft outreach for #3
+    (coach chains: /job-apply + /job-apply + /job-outreach)
+
+> How am I doing this week
+    (coach runs /job-dashboard — snapshot + tomorrow's 3 moves)
+
+> I got rejected from Acme
+    (coach chains to /job-status — flip the row, remove from pipeline)
+
+> Who should I follow up with today
+    (coach runs /job-followup — 🚨 overdue first, draft + send one-by-one)
+```
+
+Under the hood, there are **9 skills** (one orchestrator + 8 verbs) that wrap Node and Python scripts for LinkedIn Easy Apply, Greenhouse / Lever / Jobvite / Ashby, Outlook Web triage, Gmail msmtp, and a zero-dep terminal TUI. You can invoke them by slash command if you want explicit control. You rarely need to.
 
 ---
 
@@ -59,41 +69,22 @@ Requirements: [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Git
 
 > Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md with this exact text:
 >
-> > For any job-search work, proactively route through the bundled skills instead of answering conversationally. The user should talk naturally (like to a career consultant) — do the dispatching yourself.
+> > Treat the user like a career-coaching client. For any open-ended job-search talk ("help me find a job", "I need an internship", "what should I do next", "start my search"), run `/job-coach` — it interviews them, researches the market, presents a ranked slate of moves, and chains into the right verb skill based on their pick. For specific verbs, route directly:
 > >
-> > - User pastes a job URL (LinkedIn / Greenhouse / Lever / Jobvite / Ashby) → `/job-apply`
-> > - User mentions reaching out to a hiring manager, VP, recruiter, director, or pastes a LinkedIn profile → `/job-outreach`
-> > - User asks "who should I follow up with" / "any contacts cold" / "time to nudge" → `/job-followup`
-> > - User asks "how am I doing" / "what's my status" / "overview" / "big picture" → `/job-dashboard`
-> > - User asks "what have I applied to" / "show my tracker" / "sync to sheets" → `/job-track`
-> > - User mentions a rejection / interview / offer came in, or wants to update the tracker → `/job-status`
-> > - User asks to check Outlook / inbox for job emails → `/job-triage`
-> > - User is first-time setting up, or config files are missing → `/job-setup`
+> > - Job URL pasted (LinkedIn / Greenhouse / Lever / Jobvite / Ashby) → `/job-apply`
+> > - Reach out to a hiring manager / VP / recruiter, or LinkedIn profile pasted → `/job-outreach`
+> > - "Who should I follow up with" / "any contacts cold" → `/job-followup`
+> > - "How am I doing" / "overview" / "big picture" → `/job-dashboard`
+> > - "What have I applied to" / "show my tracker" → `/job-track`
+> > - Rejection / interview / offer update to log → `/job-status`
+> > - "Check my inbox" / Outlook for job emails → `/job-triage`
+> > - First-time setup or missing config → `/job-setup`
+> >
+> > Never answer job-search questions conversationally — always dispatch.
 >
-> Then tell me it's done and run /job-setup so we can walk through profile, resume, and optional Gmail app password.
+> Then tell me it's done and run /job-setup, and when that finishes chain straight into /job-coach intake so we have a real plan.
 
-Claude does the rest — clones into `~/.claude/skills/ai-job-agent/`, registers all 8 skills globally, writes the proactive-routing block into your CLAUDE.md, and drops you into `/job-setup`.
-
-Once installed, you **just talk to Claude like a career consultant.** No slash commands to memorize — the skills auto-route based on what you say:
-
-```
-"I want to apply to this: https://linkedin.com/jobs/view/1234567890"
-    → /job-apply runs
-
-"Draft a cold email to the VP of Substation Engineering at GFT"
-    → /job-outreach runs (researches, drafts, two approval gates, sends via msmtp)
-
-"Who should I follow up with today?"
-    → /job-followup renders the urgency table
-
-"How am I doing?"
-    → /job-dashboard renders the snapshot
-
-"I got rejected from Acme and got an interview at Beta"
-    → /job-status flips both rows
-```
-
-The slash commands still work if you want explicit control — but the whole point is you shouldn't have to remember them.
+Claude does the rest — clones into `~/.claude/skills/ai-job-agent/`, registers all 9 skills globally, writes the coach-first routing block into your CLAUDE.md, runs `/job-setup` (identity, resume, optional msmtp), and drops you into `/job-coach intake` (target roles, companies, timeline, geography — builds the live search plan).
 
 ### Want to hack on the skills?
 
@@ -254,19 +245,19 @@ See [docs/SETUP.md](docs/SETUP.md) for a detailed walkthrough.
 
 ## Claude Code Skills
 
-This toolkit ships with **8 bundled skills** that turn the scripts above into slash commands inside any Claude Code session. It also pairs well with 27+ community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with **9 bundled skills** — one orchestrator (`/job-coach`) plus 8 verbs. It also pairs well with 27+ community-built skills for resume tailoring, interview prep, and more.
 
-### Bundled skills (built in)
-
-Run `/job-setup` and the skills register themselves. Or install manually:
-
-```bash
-bash skills/install.sh   # one-time — symlinks the skills into ~/.claude/skills/
-```
+### The orchestrator
 
 | Skill | What it does |
 |-------|--------------|
-| `/job-setup` | Conversational onboarding. Asks for identity, education, work auth, resume path, Chrome cookies, optional msmtp. Writes every config file and registers all the skills. In-chat replacement for `bash wizard.sh`. |
+| `/job-coach` | **The persona.** Runs intake (goals, target companies, timeline, geography), researches the market live, presents a ranked slate with next-move suggestions, and chains into the verb skills based on your pick. Persists plan to `config/search-plan.md`. Invoked by open-ended phrases: "help me find a job", "I need an internship", "what should I do next". |
+
+### The verbs (chained by /job-coach or invoked directly)
+
+| Skill | What it does |
+|-------|--------------|
+| `/job-setup` | Conversational onboarding. Auto-reads your files (CLAUDE.md, `~/.brain`, memory, `~/.msmtprc`), scans for resume PDFs, only asks for gaps. Writes every config file and registers all the skills. |
 | `/job-apply <url>` | Apply to a job by URL. Auto-routes to the right ATS filler (LinkedIn / Greenhouse / Lever / Jobvite / Ashby). Dry-run by default; pass `--submit` to actually submit. |
 | `/job-track [sync]` | Show your local tracker grouped by status. Pass `sync` to push new rows to Google Sheets. |
 | `/job-triage [query]` | Search Outlook Web, classify results (rejection / interview / confirmation / …), step through extract/mark-read. |
@@ -274,6 +265,12 @@ bash skills/install.sh   # one-time — symlinks the skills into ~/.claude/skill
 | `/job-outreach <target>` | Research a company or hiring manager, draft a personalized cold email in chat, approve, and send via your local msmtp. Logs to `outreach-log.csv`. The agent itself is the LLM — no external API. |
 | `/job-followup [send]` | Walk the day-7 follow-ups. Reads `outreach-log.csv`, computes urgency (max 2 follow-ups per contact per career-ops cadence), drafts and sends one at a time. |
 | `/job-dashboard [live]` | ANSI-colored terminal dashboard — applications + outreach + follow-ups in one view. Snapshot in chat by default; `live` gives you the command for the interactive TUI (tabs, arrow-key nav, live reload) in a separate terminal tab. Zero deps. |
+
+Run `/job-setup` and the skills register themselves. Or install manually:
+
+```bash
+bash skills/install.sh   # one-time — symlinks the 9 skills into ~/.claude/skills/
+```
 
 Each skill is just a markdown file at `skills/<name>/SKILL.md` — open one to see exactly what the agent is told to do. The skills render results as markdown tables so you can see what happened at a glance.
 
@@ -328,6 +325,7 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   +-- tracker-status-update.py       # Batch status updater
 |-- skills/
 |   |-- install.sh                     # register bundled skills into ~/.claude/skills/
+|   |-- job-coach/SKILL.md             # /job-coach — persona + orchestrator (entry point)
 |   |-- job-setup/SKILL.md             # /job-setup — in-chat onboarding
 |   |-- job-apply/SKILL.md             # /job-apply — auto-routes ATS filler
 |   |-- job-track/SKILL.md             # /job-track — tracker + sheet sync
@@ -341,6 +339,7 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- daily-log.template.md          # Daily submission log template
 |   |-- tracker.template.csv           # CSV tracker headers
 |   |-- outreach-log.template.csv      # Cold-email log headers
+|   |-- search-plan.template.md        # /job-coach working brief
 |   +-- interview-prep.template.md     # Interview prep template
 +-- docs/
     |-- SETUP.md                       # Detailed setup guide
