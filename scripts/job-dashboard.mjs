@@ -635,6 +635,16 @@ function viewPipeline(applications, outreach) {
   const blocked = counts.blocked || 0;
   const withdrawn = counts.withdrawn || 0;
 
+  // Cumulative "reached this stage or further" — the right way to read a funnel.
+  // status field is current-state, so an interviewing candidate already counted
+  // as "submitted" and "applied" — sum forward through the stages.
+  const reached = {};
+  let running = 0;
+  for (let i = stages.length - 1; i >= 0; i -= 1) {
+    running += stageCounts[stages[i]];
+    reached[stages[i]] = running;
+  }
+
   // Last-14-day sparklines
   const apps14 = rowsPerDay(applications, 'date', 14);
   const out14 = rowsPerDay(outreach, 'sent_at', 14);
@@ -643,24 +653,28 @@ function viewPipeline(applications, outreach) {
 
   // Funnel rows
   const funnelLines = [];
-  funnelLines.push(color(ANSI.bold + ANSI.cyan, 'Pipeline funnel — all-time'));
+  funnelLines.push(color(ANSI.bold + ANSI.cyan, 'Pipeline funnel — all-time (cumulative: how many reached this stage)'));
   funnelLines.push('');
 
   const stageEmoji = { applied: '📄', submitted: '📬', interview: '💼', offer: '🎯' };
+  const topReached = reached.applied || 1;
 
-  let prev = total;
   for (let i = 0; i < stages.length; i += 1) {
     const stage = stages[i];
-    const n = stageCounts[stage];
-    const rate = prev > 0 ? Math.round((n / prev) * 100) : 0;
-    const bar = ' '.repeat(Math.max(0, 26 - Math.floor((n / Math.max(total, 1)) * 26))) +
-      color(ANSI.bg.cyan + ANSI.black, ' '.repeat(Math.floor((n / Math.max(total, 1)) * 26)));
-    funnelLines.push(`  ${stageEmoji[stage]} ${pad(stage, 12)} ${pad(String(n), 4, 'right')}   ${bar}  ${color(ANSI.dim, `(${rate}% from ${stages[i - 1] || 'total'})`)}`);
+    const n = reached[stage];
+    const prevN = i === 0 ? topReached : reached[stages[i - 1]];
+    const rate = prevN > 0 && i > 0 ? Math.round((n / prevN) * 100) : 100;
+    const barW = Math.floor((n / topReached) * 26);
+    const bar = color(ANSI.bg.cyan + ANSI.black, ' '.repeat(Math.max(1, barW))) +
+      ' '.repeat(Math.max(0, 26 - barW));
+    const rateLabel = i === 0
+      ? color(ANSI.dim, `(${total > 0 ? Math.round((n / total) * 100) : 0}% of all logged)`)
+      : color(ANSI.dim, `(${rate}% from ${stages[i - 1]})`);
+    funnelLines.push(`  ${stageEmoji[stage]} ${pad(stage, 12)} ${pad(String(n), 4, 'right')}   ${bar}  ${rateLabel}`);
     if (i < stages.length - 1) {
       funnelLines.push(color(ANSI.dim, `        │`));
       funnelLines.push(color(ANSI.dim, `        ▼`));
     }
-    prev = n;
   }
 
   if (stageCounts.offer > 0) {
