@@ -13,7 +13,8 @@
     "send": "node scripts/outlook-send.js",
     "dashboard": "node scripts/job-dashboard.mjs",
     "dashboard:snapshot": "node scripts/job-dashboard.mjs --snapshot",
-    "agent": "bash bin/job-agent.sh"
+    "agent": "bash bin/job-agent.sh",
+    "smoke": "bash bin/smoke-test.sh"
   },
   "dependencies": {
     "playwright-core": "^1.40.0"

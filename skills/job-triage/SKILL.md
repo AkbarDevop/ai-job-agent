@@ -86,6 +86,46 @@ Run each `text` through these regex rules **in order — first match wins**:
 
 Keep each row ≤ 120 chars.
 
+### 4.5. Cross-reference with outreach-log.csv (auto-detect replies)
+
+After classifying the inbox, read `$AI_JOB_AGENT_ROOT/outreach-log.csv` and try to match each unread email to a prior cold-email row by **sender email** (the `to_email` field in outreach-log is the *recipient* of the original send — when they reply, they become the *sender* of the inbound email).
+
+Extract the sender email from each result's `aria` label or extracted body (use `outlook-triage.js extract <idx>` if needed for the headers). Match against `outreach-log.csv.to_email` (case-insensitive).
+
+For every match where the row's `replied_at` is currently empty:
+
+| Original outreach (from log) | Inbound class | Proposed update |
+|------------------------------|---------------|-----------------|
+| Paul Young <paul@gft.com> · sent 2026-04-10 | interview_invite | `replied_at` = today, `status` = `interview_scheduled` |
+| Zulfiya V <zv@worley.com> · sent 2026-04-15 | rejection | `replied_at` = today, `status` = `replied`, append note |
+| Hans M <h.mueller@siemens.com> · sent 2026-04-22 | recruiter_outreach | `replied_at` = today, `status` = `replied` |
+
+Render the proposed updates as a confirmation table:
+
+```
+🔁 Reply auto-detection — 3 matches in outreach-log.csv
+
+| # | Recipient            | Original sent | Inbound class      | Proposed status     |
+|---|----------------------|---------------|--------------------|---------------------|
+| 1 | paul@gft.com         | 2026-04-10    | interview_invite   | interview_scheduled |
+| 2 | zv@worley.com        | 2026-04-15    | rejection          | replied             |
+| 3 | h.mueller@siemens... | 2026-04-22    | recruiter_outreach | replied             |
+
+Apply all? Apply some (numbers comma-separated)? Skip?
+```
+
+On confirm, **edit `outreach-log.csv` directly via the Edit tool** — find each row by `to_email`, set `replied_at` to the current ISO timestamp, set `status` to the proposed class, and append a one-line note to `notes`. This skips `/job-status` because outreach-log is a different file from application-tracker.csv (and `/job-status` operates on the latter).
+
+Print a summary:
+
+| Field | Value |
+|-------|------:|
+| Matches found | 3 |
+| Updates applied | 3 |
+| Rows still pending | (count of unmatched inbound emails — those are likely from contacts not in your outreach log) |
+
+Skip this step entirely if `outreach-log.csv` doesn't exist (cold-email setup wasn't completed).
+
 ### 5. Offer next actions (don't do them automatically)
 
 Ask the user:
