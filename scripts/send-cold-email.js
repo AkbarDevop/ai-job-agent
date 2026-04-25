@@ -18,15 +18,22 @@
  *
  * Payload:
  *   {
- *     "from":     "Akbar Kamoldinov <k.akbarme@gmail.com>",
- *     "to":       "recipient@example.com"       | ["a@x.com", "b@y.com"],
- *     "cc":       null | "c@x.com"              | [...],
- *     "bcc":      null | "d@x.com"              | [...],
- *     "subject":  "Quick question about substation engineering intern",
- *     "body":     "Hi Paul,\n\nI'm Akbar, an EE junior at Mizzou...\n",
- *     "reply_to": null | "k.akbarme@gmail.com",
- *     "account":  null | "gmail"    // optional msmtp account name
+ *     "from":         "Akbar Kamoldinov <k.akbarme@gmail.com>",
+ *     "to":           "recipient@example.com"       | ["a@x.com", "b@y.com"],
+ *     "cc":           null | "c@x.com"              | [...],
+ *     "bcc":          null | "d@x.com"              | [...],
+ *     "subject":      "Re: Quick question about substation engineering",
+ *     "body":         "Hi Paul,\n\nFollowing up on my note from Apr 10...\n",
+ *     "reply_to":     null | "k.akbarme@gmail.com",
+ *     "account":      null | "gmail",     // optional msmtp account
+ *     "in_reply_to":  null | "<msg-id>",  // RFC 5322 — for follow-ups
+ *     "references":   null | ["<id1>","<id2>"]  // thread chain; defaults
+ *                                                 to [in_reply_to] if unset
  *   }
+ *
+ * For follow-ups, set `in_reply_to` to the original send's `messageId`
+ * (read from outreach-log.csv). The recipient's mail client will thread
+ * the new message under the original. Subject convention: prefix "Re: ".
  *
  * Exit codes:
  *   0 = success (message handed to msmtp)
@@ -79,36 +86,81 @@ function toList(value) {
   return Array.isArray(value) ? value : [value];
 }
 
-function buildMessage(payload) {
-  const to = toList(payload.to);
-  const cc = toList(payload.cc);
-  const bcc = toList(payload.bcc);
+// RFC 5322 header value sanitization. Strips CR/LF to prevent header
+// injection — without this, a malicious or malformed CSV row could inject
+// extra headers (e.g. Bcc) by including a newline in any string field.
+function sanitizeHeaderValue(s) {
+  return String(s ?? '').replace(/[\r\n]+/g, ' ').trim();
+}
 
-  const domain = (payload.from.match(/@([^>\s]+)/) || [, 'localhost'])[1];
+function normalizeMsgId(id) {
+  if (!id) return null;
+  const trimmed = sanitizeHeaderValue(id);
+  if (!trimmed) return null;
+  // Strip whitespace inside — RFC 5322 message-ids must not contain it.
+  const compact = trimmed.replace(/\s+/g, '');
+  if (compact.startsWith('<') && compact.endsWith('>')) return compact;
+  return `<${compact}>`;
+}
+
+function buildMessage(payload) {
+  // Sanitize all header-bound strings up front. CR/LF in any of these
+  // would otherwise let a malformed CSV inject extra headers (Bcc, etc).
+  const fromHdr = sanitizeHeaderValue(payload.from);
+  const subjectHdr = sanitizeHeaderValue(payload.subject);
+  const replyToHdr = payload.reply_to ? sanitizeHeaderValue(payload.reply_to) : null;
+  const accountHdr = payload.account ? sanitizeHeaderValue(payload.account) : null;
+
+  const to = toList(payload.to).map(sanitizeHeaderValue).filter(Boolean);
+  const cc = toList(payload.cc).map(sanitizeHeaderValue).filter(Boolean);
+  const bcc = toList(payload.bcc).map(sanitizeHeaderValue).filter(Boolean);
+
+  const domain = (fromHdr.match(/@([^>\s]+)/) || [, 'localhost'])[1];
   const messageId = `<${crypto.randomBytes(12).toString('hex')}@${domain}>`;
   const now = new Date().toUTCString();
 
+  // RFC 5322 threading. If `in_reply_to` is set, this is a follow-up that
+  // should land in the same thread as the original send. `references` is
+  // the chain of all prior message-ids in the thread (or just the parent).
+  const inReplyTo = normalizeMsgId(payload.in_reply_to);
+  const referencesIn = toList(payload.references)
+    .map(normalizeMsgId)
+    .filter(Boolean);
+  // If only in_reply_to is given, References should at minimum contain it.
+  const references = referencesIn.length
+    ? referencesIn
+    : (inReplyTo ? [inReplyTo] : []);
+
   const headers = [
-    `From: ${payload.from}`,
+    `From: ${fromHdr}`,
     `To: ${to.join(', ')}`,
   ];
   if (cc.length) headers.push(`Cc: ${cc.join(', ')}`);
   if (bcc.length) headers.push(`Bcc: ${bcc.join(', ')}`);
   headers.push(
-    `Subject: ${payload.subject}`,
+    `Subject: ${subjectHdr}`,
     `Date: ${now}`,
     `Message-ID: ${messageId}`,
     `MIME-Version: 1.0`,
     `Content-Type: text/plain; charset=utf-8`,
     `Content-Transfer-Encoding: 8bit`,
   );
-  if (payload.reply_to) headers.push(`Reply-To: ${payload.reply_to}`);
+  if (inReplyTo) headers.push(`In-Reply-To: ${inReplyTo}`);
+  if (references.length) headers.push(`References: ${references.join(' ')}`);
+  if (replyToHdr) headers.push(`Reply-To: ${replyToHdr}`);
 
-  const body = payload.body.endsWith('\n') ? payload.body : payload.body + '\n';
+  // Body is NOT sanitized — newlines are valid in the body. But we do
+  // ensure it ends with a single newline so msmtp doesn't choke.
+  const body = String(payload.body ?? '').endsWith('\n')
+    ? String(payload.body ?? '')
+    : String(payload.body ?? '') + '\n';
   return {
     message: headers.join('\r\n') + '\r\n\r\n' + body,
     messageId,
+    inReplyTo,
+    references,
     recipients: { to, cc, bcc },
+    account: accountHdr,
   };
 }
 
@@ -125,7 +177,7 @@ function resolveMsmtp() {
 
 function main() {
   const { payload, dryRun } = readPayload(process.argv);
-  const { message, messageId, recipients } = buildMessage(payload);
+  const { message, messageId, inReplyTo, references, recipients, account } = buildMessage(payload);
 
   if (dryRun) {
     process.stdout.write(
@@ -134,6 +186,8 @@ function main() {
           ok: true,
           dryRun: true,
           messageId,
+          inReplyTo,
+          references,
           recipients,
           bytes: Buffer.byteLength(message, 'utf8'),
           preview: message.slice(0, 800),
@@ -154,7 +208,7 @@ function main() {
   }
 
   const args = ['-t'];
-  if (payload.account) args.push('-a', payload.account);
+  if (account) args.push('-a', account);
 
   const result = spawnSync(msmtpPath, args, {
     input: message,
@@ -172,6 +226,8 @@ function main() {
         ok: true,
         dryRun: false,
         messageId,
+        inReplyTo,
+        references,
         recipients,
         bytes: Buffer.byteLength(message, 'utf8'),
         msmtpPath,

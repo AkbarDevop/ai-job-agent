@@ -88,11 +88,26 @@ Loop through the `overdue` + `due` rows, one at a time. For each:
      - New angle (different from the first follow-up).
      - Explicit: "If not a fit right now, I'll leave you alone — just wanted to confirm."
 
-3. Show the draft with a **Reply or new thread?** note (reply keeps the thread — we should use the original `message_id` as `In-Reply-To` for proper threading).
+3. Build the JSON payload for `scripts/send-cold-email.js` with **threading** so the follow-up lands in the same email thread as the original cold email:
+
+   ```json
+   {
+     "from":        "<from-from-candidate-profile>",
+     "to":          "<row.to_email>",
+     "subject":     "Re: <original subject>",
+     "body":        "<the new follow-up body>",
+     "in_reply_to": "<row.message_id>",
+     "references":  ["<row.message_id>"]
+   }
+   ```
+
+   The original `message_id` lives in the `outreach-log.csv` row (set by `/job-outreach` on the original send). If `message_id` is empty for some reason, omit `in_reply_to` — the email still sends, just won't thread.
+
+   Always prefix the subject with `"Re: "` (don't double-prefix if it already starts with `Re:`).
 
 4. Ask: "send / edit / skip / stop"
-   - `send` → call `scripts/send-cold-email.js` (with `In-Reply-To` header if we have the original `message_id`).
-   - `edit` → regenerate.
+   - `send` → run the dry-run preview first, then on confirm pipe the JSON into `node scripts/send-cold-email.js`. The script's output JSON now includes `inReplyTo` + `references` so you can verify threading worked.
+   - `edit` → regenerate the body.
    - `skip` → move to next row without sending; nothing logged.
    - `stop` → end the loop.
 
@@ -114,9 +129,9 @@ Loop through the `overdue` + `due` rows, one at a time. For each:
 
 ## Handling `In-Reply-To` threading
 
-`scripts/send-cold-email.js` doesn't natively support `In-Reply-To` — add a header by passing a new payload field. For the first iteration, this is optional: cold-email threads are not always threaded on the recipient side. If the script lacks support and you want threading, note this in the run output so we can extend the script later.
+`scripts/send-cold-email.js` natively supports threading. Pass `in_reply_to` (the original send's `messageId` from `outreach-log.csv`) and optionally `references` (the full thread chain — defaults to `[in_reply_to]` if omitted). The script writes RFC 5322 `In-Reply-To` + `References` headers; recipient mail clients (Gmail, Outlook, Apple Mail) will thread the follow-up under the original.
 
-(Implementation note: threading support can be added by extending the script to accept `in_reply_to` + `references` top-level keys and appending them as headers before `Subject`. A PR-worthy follow-up.)
+If `outreach-log.csv` has an empty `message_id` for the row (e.g. a manually-added row, or a send before threading shipped), skip `in_reply_to` — the email goes out as a standalone send. The skill should flag this in the run output so the user knows the thread won't connect.
 
 ## Safety rails (same as /job-outreach)
 

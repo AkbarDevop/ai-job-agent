@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ai-job-agent — product brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Latin+Modern+Roman:ital,wght@0,400;0,700;1,400&family=Latin+Modern+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #0B5394;
+    --muted: #6B6B6B;
+    --rule: #d8d8d8;
+    --bg: #fafaf7;
+    --fg: #1a1a1a;
+    --serif: "Latin Modern Roman", "Computer Modern", "CMU Serif", Georgia, "Times New Roman", serif;
+    --mono: "Latin Modern Mono", "CMU Typewriter Text", "Menlo", "Consolas", monospace;
+  }
+  html, body { background: var(--bg); color: var(--fg); }
+  body {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.55;
+    max-width: 760px;
+    margin: 3rem auto;
+    padding: 0 2rem 5rem;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  header.title-block {
+    text-align: center;
+    margin-bottom: 2.4rem;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.6rem;
+  }
+  h1 { font-size: 2.1rem; font-weight: 700; margin: 0 0 0.3em; letter-spacing: -0.01em; }
+  .tagline { color: var(--muted); font-size: 1.15rem; font-style: italic; margin: 0 0 1em; }
+  .author { color: var(--muted); font-size: 0.95rem; }
+  .author a { color: var(--accent); text-decoration: none; }
+  .author a:hover { text-decoration: underline; }
+  .date { color: var(--muted); font-size: 0.85rem; margin-top: 0.4em; }
+  h2 {
+    color: var(--accent);
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 2.4rem 0 0.6rem;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.2em;
+  }
+  h3 { font-size: 1.1rem; font-weight: 700; margin: 1.6rem 0 0.4rem; }
+  p { margin: 0.6em 0; text-align: justify; hyphens: auto; }
+  ul, ol { padding-left: 1.4em; }
+  li { margin: 0.25em 0; }
+  strong { font-weight: 700; }
+  em { font-style: italic; }
+  code, .mono { font-family: var(--mono); font-size: 0.92em; background: #f0eee8; padding: 0.05em 0.35em; border-radius: 3px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .tldr {
+    background: #f5f3eb;
+    border-left: 3px solid var(--accent);
+    padding: 1em 1.2em;
+    margin: 0 0 2rem;
+  }
+  .tldr p { margin: 0.4em 0; text-align: left; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  td { padding: 0.5em 0.6em; vertical-align: top; border-bottom: 1px solid var(--rule); }
+  td:first-child { font-weight: 700; width: 32%; }
+  hr { border: none; border-top: 1px solid var(--rule); margin: 3rem 0 1rem; }
+  footer { color: var(--muted); font-size: 0.85rem; text-align: center; }
+  @media print {
+    body { background: white; max-width: 6.5in; margin: 0 auto; }
+    h2 { page-break-after: avoid; }
+    li { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header class="title-block">
+  <h1>ai-job-agent</h1>
+  <p class="tagline">A personal AI career coach that runs in your terminal</p>
+  <p class="author">
+    Akbarjon Kamoldinov &nbsp;·&nbsp;
+    <a href="https://akbar.one">akbar.one</a> &nbsp;·&nbsp;
+    <a href="https://github.com/AkbarDevop/ai-job-agent">github.com/AkbarDevop/ai-job-agent</a>
+  </p>
+  <p class="date">April 2026 &nbsp;·&nbsp; v1 shipped</p>
+</header>
+
+<div class="tldr">
+  <p><strong>What.</strong> An open-source Claude Code skill pack that runs the entire job search end-to-end — research target roles, fill ATS forms across 5 platforms, send personalized cold emails, manage day-7 follow-ups, triage replies, track everything — from a single unified terminal session.</p>
+  <p><strong>Why.</strong> I cold-emailed 228 hiring managers during my own internship search this spring. Twelve days later I had a signed offer at GFT Infrastructure (substation engineering, St. Louis). The agent that did the work was scrappy. I rebuilt it as a polished skill pack so anyone with Claude Code can run it.</p>
+  <p><strong>Where.</strong> Lives at <a href="https://github.com/AkbarDevop/ai-job-agent">AkbarDevop/ai-job-agent</a>. Install in 30 seconds. Talk to it like a career consultant.</p>
+</div>
+
+<h2>The Problem</h2>
+
+<p>The internship search is two jobs — the actual hiring funnel, and the meta-work of tracking 200 applications, drafting 50 cold emails, scheduling day-7 nudges, classifying inbound rejections, and remembering which resume variant goes to which role.</p>
+
+<p>Existing tools each solve one slice. LinkedIn Easy Apply for some apps. Greenhouse for others. Notion or Google Sheets for tracking. Mailmerge for outreach. Calendly for scheduling. None of them <em>coach</em>. None of them know your work-authorization story. None of them let you describe a role in English and have the right form filled out 30 seconds later.</p>
+
+<p>International STEM students get the worst version of this problem. Sponsorship-gated postings, F-1 / OPT / CPT nuance baked into every form, time-zone-shifted phone screens, cold emails that need to land in Uzbek or Mandarin or Spanish. The off-the-shelf SaaS doesn't help.</p>
+
+<h2>The Insight</h2>
+
+<p>Claude Code is already a terminal-native coding agent that lives where developers and technical students live. With its skill-pack model, you can give Claude a domain — "you are a career coach for this user" — and it will wear that hat until you give it a different domain. We don't need a new app. We need to teach the agent the user already trusts how to run a job search.</p>
+
+<p>Three corollaries:</p>
+
+<ul>
+  <li><strong>The agent is the LLM.</strong> No Gemini SDK, no OpenAI key, no separate subscription. The user already pays for Claude. We just ride that.</li>
+  <li><strong>Local-first by default.</strong> Resume, contacts, application history, cold-email log — all live as plain CSVs and markdown on the user's machine. We never upload. This is a massive privacy win for any job seeker who doesn't want LinkedIn knowing they're looking.</li>
+  <li><strong>Skills compose.</strong> Our 9 skills sit alongside <a href="https://github.com/garrytan/gstack">gstack</a> (devops), <a href="https://github.com/proficiently/claude-skills">proficiently</a> (job search adjacent), <a href="https://github.com/jmagar/ResumeSkills">ResumeSkills</a>. Users assemble the kit they need. We're not a walled garden.</li>
+</ul>
+
+<h2>The Product (v1, shipped)</h2>
+
+<p>Nine skills, one orchestrator, one unified TUI. All open-source MIT.</p>
+
+<ul>
+  <li><code>/job-coach</code> — the persona. Runs intake, researches the market live, presents a ranked slate of next moves, chains into the verb skills based on the user's pick. Persists plan to <code>config/search-plan.md</code>. <em>Open-ended phrases like "help me find a job" route here.</em></li>
+  <li><code>/job-setup</code> — conversational onboarding. Auto-reads your existing files (CLAUDE.md, brain, memory, msmtprc), scans for resume PDFs, only asks for genuine gaps. Optional Gmail App Password walkthrough for cold email.</li>
+  <li><code>/job-apply</code> — pastes a job URL, auto-routes to the right ATS filler (LinkedIn / Greenhouse / Lever / Jobvite / Ashby), dry-run by default, two-gate approval before submit.</li>
+  <li><code>/job-outreach</code> — researches a hiring manager, drafts a 4-block personalized cold email in chat, two-gate approval, sends via local <code>msmtp</code>, logs.</li>
+  <li><code>/job-followup</code> — 7-day cadence (max 2 nudges per contact, borrowed from <a href="https://github.com/santifer/career-ops">career-ops</a>), urgency dashboard, draft + send one at a time.</li>
+  <li><code>/job-track</code>, <code>/job-status</code>, <code>/job-triage</code> — local CSV tracker, Google Sheets sync, batch status updates, Outlook Web classification.</li>
+  <li><code>/job-dashboard</code> — terminal TUI (zero dependencies, pure Node + ANSI + Unicode box chars). Tabs for Applications, Outreach, Follow-ups, Pipeline funnel. Live reload via <code>fs.watch</code>. Help overlay (<code>?</code>), fuzzy filter (<code>/</code>), split-pane detail (<code>enter</code>).</li>
+</ul>
+
+<p><strong>Unified mode.</strong> <code>npm run agent</code> opens a single terminal window with Claude Code chat on top and the live TUI on bottom (tmux split-pane). Type "got rejected from Acme" to Claude in the top pane; the funnel updates in the bottom pane within 200ms. No tab switching, no manual reload. The agent always feels alive.</p>
+
+<p><strong>Truthful by default.</strong> CAPTCHA stalls log as <code>blocked</code>, never <code>submitted</code>. Sponsorship questions reflect actual visa status. Cold emails go through two approval gates. The product refuses to be sleazy.</p>
+
+<h2>Why Now</h2>
+
+<ul>
+  <li><strong>Claude Code skill ecosystem just matured.</strong> gstack, career-ops, ResumeSkills all shipped Q1–Q2 2026. Critical mass for the "compose your agent from skills" pattern.</li>
+  <li><strong>ATS market consolidated.</strong> Five platforms cover &gt;80% of US tech hiring. The form-filling problem is finite and tractable.</li>
+  <li><strong>Recession-era hiring favors cold outreach.</strong> Application-only candidates drown in inbox piles. Hiring-manager-direct candidates get phone screens. The 12-day cold-email-to-offer story isn't a fluke; it's the new market.</li>
+  <li><strong>Local-first AI is the new privacy posture.</strong> The wave of "don't tell GitHub Copilot what's in my repo" has moved to "don't tell LinkedIn I'm looking." Local-first lands.</li>
+</ul>
+
+<h2>Wedge → Market</h2>
+
+<p><strong>Wedge:</strong> international engineering undergrads at US universities, hunting for summer internships. Roughly 200,000 students per year (IIE Open Doors). The hardest version of the problem — visa complexity, no built-in alumni network, English-second-language cold emails. Ship for them, the rest is downhill.</p>
+
+<p><strong>Adjacent expansions:</strong></p>
+
+<ul>
+  <li>US-citizen STEM undergrads (4M+ per year)</li>
+  <li>Career-changers (boot-camp grads, mid-career pivots)</li>
+  <li>Stealth-search executives (don't want LinkedIn signal)</li>
+  <li>Returning parents / re-entry candidates</li>
+  <li>Founders winding down a company who need their next role found quietly</li>
+</ul>
+
+<p><strong>TAM (rough, US only):</strong> 19M college students, 5% AI-tool adoption in 2 years ≈ 950K users. Free OSS tier → paid concierge SaaS at $14/run for non-technical users (already shipping at <a href="https://jobhunter-waitlist.netlify.app">jobhunter-waitlist.netlify.app</a>). $13M ARR opportunity at 1% conversion to paid.</p>
+
+<h2>Differentiation</h2>
+
+<table>
+  <tr><td>vs LinkedIn Easy Apply</td><td>We fill the same forms, but also write the cold email, draft the follow-up, and read the rejection email. End-to-end, not a single-step.</td></tr>
+  <tr><td>vs SaaS competitors (Simplify, Sonara, etc.)</td><td>Local-first; their data stays on their machine. No subscription beyond Claude. Skills compose; ours sit alongside gstack and career-ops, not against them.</td></tr>
+  <tr><td>vs career-ops (closest peer)</td><td>They built in Go + Bubble Tea + 14 modes; we built in Node + zero deps + Claude Code-native. They have richer reports; we have lower install friction and a unified TUI/chat experience nobody else has.</td></tr>
+  <tr><td>vs "just talk to ChatGPT"</td><td>We persist state. We send actual emails through actual SMTP. We click actual ATS forms. We don't just give advice.</td></tr>
+</table>
+
+<h2>Traction (real, not synthetic)</h2>
+
+<p>Built during the author's actual Spring 2026 internship search. Refined across:</p>
+
+<ul>
+  <li>350+ applications submitted across 5 ATS platforms</li>
+  <li>228+ cold emails sent to VPs, hiring managers, and recruiters</li>
+  <li>65+ LinkedIn connections requested across 4 outreach rounds (energy companies, dev banks, US firms, Uzbekistan tech ecosystem)</li>
+  <li>2 VP interview callbacks from cold emails alone</li>
+  <li>1 panel interview → 1 signed offer (GFT Infrastructure, substation engineering, St. Louis, mid-May 2026 start) — 12 days from cold email to signed DocuSign</li>
+  <li>1 international fallback offer (Eren Boz, Koc Construction, Uzbekistan)</li>
+  <li>23 GitHub stars, 4 forks since open-source publish on March 25, 2026</li>
+</ul>
+
+<h2>Roadmap</h2>
+
+<ul>
+  <li><strong>v1 (shipped, today)</strong> — 9 skills, unified TUI, msmtp cold email, Outlook triage, Google Sheets sync, persona-driven coach. Free, OSS, MIT.</li>
+  <li><strong>v1.1 (this week)</strong> — threaded follow-ups (<code>In-Reply-To</code> header), reply auto-detection (triage → tracker), per-skill smoke tests, fresh-install dogfood pass.</li>
+  <li><strong>v2</strong> — scheduled daily standups via Telegram (<code>@aristotlerobot</code> or similar), Slack integration, "what did I do today / what's blocking me" check-in. Calendar integration for interview scheduling.</li>
+  <li><strong>v3</strong> — privacy-preserving market signal: opt-in anonymized aggregate data ("who else applied to Ameren this week, median response time"). Bloom-filter or differential-privacy approach to never expose individual applications.</li>
+  <li><strong>v4</strong> — non-technical user tier. The paid SaaS at <a href="https://jobhunter-waitlist.netlify.app">jobhunter-waitlist.netlify.app</a>: $14/run, web dashboard, customers approve drafts, agent does the rest. Already prototyped, waitlist live.</li>
+</ul>
+
+<h2>Why This Team</h2>
+
+<p>One person right now: a junior EE at the University of Missouri, F-1 student from Uzbekistan, who built it during his own job search and tested it on himself first. The repo's GitHub commit history is the product roadmap; the personal story is the proof-of-thesis. Every feature was built because the author needed it the same week.</p>
+
+<p>The author maintains a multi-agent "brain" system across his work (<code>~/.brain/</code>) and posts to <a href="https://t.me/akbardaily">@akbardaily</a> on Telegram daily. The OSS repo is one of seven active projects he ships on simultaneously — builder velocity is high.</p>
+
+<h2>The Ask</h2>
+
+<p>In order of preference:</p>
+
+<ol>
+  <li><strong>Users.</strong> If you are a student or job seeker, install it (one paste into Claude Code). If you are a career counselor at a university, recommend it.</li>
+  <li><strong>Contributors.</strong> Open issues + PRs welcome. Good first issues: new ATS platform support (Workday, iCIMS, SuccessFactors), Notion / Airtable tracker integrations, language packs for non-English cold emails, replay-detection sync.</li>
+  <li><strong>Stars and forks.</strong> The repo is at 23 stars; we'd like it at 1,000 by August 2026.</li>
+  <li><strong>For the paid SaaS:</strong> early-stage capital interest welcomed for the concierge tier (<a href="mailto:k.akbarme@gmail.com">k.akbarme@gmail.com</a>). Currently bootstrapped.</li>
+</ol>
+
+<hr>
+<footer>
+  This brief was generated as part of a CEO-mode strategic pass on April 25, 2026. It will be updated quarterly. The repo is the truth.
+</footer>
+
+</body>
+</html>
