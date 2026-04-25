@@ -159,7 +159,7 @@ All application scripts use consistent exit codes:
 
 ## Recommended Companion Skills
 
-The skills below are community-built and complement the 4 bundled skills above:
+The skills below are community-built and complement the 9 bundled skills above:
 
 - `/job-search` -- Multi-board job search
 - `/tailor-resume` -- Resume customization per posting
@@ -169,6 +169,19 @@ The skills below are community-built and complement the 4 bundled skills above:
 - `/salary-negotiation-prep` -- Market rate research
 
 See `skills/README.md` for the full list and install commands.
+
+## gstack
+
+This repo pairs well with [gstack](https://github.com/garrytan/gstack) — a general-purpose Claude Code skill pack for shipping code. Install gstack once (`git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup`) and these gstack skills become useful in this repo's workflow:
+
+- **Web browsing:** use `/browse` for all web browsing. Never use `mcp__claude-in-chrome__*` tools. `/connect-chrome` + `/setup-browser-cookies` for authenticated pages (useful for LinkedIn / Outlook flows).
+- **Shipping code:** `/ship` to sync main + run tests + push + open PR (this repo pushes direct to main by convention, but `/ship` still handles the rest). `/review` for pre-landing paranoid review. `/codex` for a second-opinion code review.
+- **Testing:** `/qa` / `/qa-only` for systematic QA + fix loops. `/browse` for one-off dogfooding.
+- **Debugging:** `/investigate` for root-cause debugging. `/careful` / `/freeze` / `/guard` / `/unfreeze` for safety during destructive ops on the trackers / config files.
+- **Dev-experience:** `/devex-review` after shipping a new skill — it actually runs the install + first-skill-invocation and scores the onboarding. `/plan-devex-review` before adding new skills.
+- **Post-ship:** `/document-release` to sync `README.md` / `CLAUDE.md` / `skills/README.md` after a skill lands. `/retro` for the weekly "what did we ship" log.
+
+If gstack isn't installed, those skills are optional — this repo's 9 bundled skills (`/job-coach`, `/job-setup`, `/job-apply`, `/job-track`, `/job-triage`, `/job-status`, `/job-outreach`, `/job-followup`, `/job-dashboard`) work standalone.
 
 ## File Locations
 
