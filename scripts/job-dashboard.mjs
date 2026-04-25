@@ -9,15 +9,19 @@
 //                                                  Claude Code skill)
 //
 // Zero dependencies. Reads application-tracker.csv and outreach-log.csv from
-// the repo root (resolved via $AI_JOB_AGENT_ROOT, the REPO_PATH marker file,
-// or ~/ai-job-agent as a fallback).
+// the repo root (resolved via $AI_JOB_AGENT_ROOT, ~/.claude/skills/ai-job-agent,
+// the REPO_PATH marker file, or ~/ai-job-agent).
 //
 // Keybindings in interactive mode:
 //   tab / right / left   switch tab
-//   1  2  3              jump to tab
+//   1 2 3 4              jump to tab (Applications / Outreach / Follow-ups / Pipeline)
 //   up / down / j / k    scroll rows
-//   r                    reload from disk
-//   q / Ctrl-C / esc     quit
+//   /                    fuzzy filter the current tab
+//   enter                open detail pane for the selected row
+//   esc                  close detail / clear filter / dismiss help
+//   ?                    toggle help overlay
+//   r                    reload from disk (auto-reload also fires on file change)
+//   q / Ctrl-C           quit
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -43,6 +47,7 @@ const ANSI = {
     yellow: '\x1b[43m',
     green: '\x1b[42m',
     red: '\x1b[41m',
+    black: '\x1b[40m',
   },
   clear: '\x1b[2J\x1b[H',
   clearLine: '\x1b[2K',
@@ -72,6 +77,15 @@ const URGENCY_EMOJI = {
   waiting: '💤',
 };
 
+const URGENCY_COLOR = {
+  overdue: ANSI.red,
+  due: ANSI.yellow,
+  soon: ANSI.cyan,
+  waiting: ANSI.dim,
+};
+
+const SPARK_CHARS = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+
 function color(c, s) {
   return `${c}${s}${ANSI.reset}`;
 }
@@ -95,7 +109,6 @@ function stripAnsi(s) {
   return s.replace(/\x1b\[[0-9;]*m/g, '');
 }
 
-// Approximate visible width — emoji counts as 2, everything else as 1.
 function visibleWidth(s) {
   let w = 0;
   for (const ch of s) {
@@ -121,17 +134,23 @@ function truncate(s, max) {
   return out + '…';
 }
 
+function sparkline(values, opts = {}) {
+  if (!values.length) return '';
+  const max = opts.max != null ? opts.max : Math.max(...values, 1);
+  return values
+    .map((v) => {
+      if (v === 0) return ' ';
+      const idx = Math.min(SPARK_CHARS.length - 1, Math.floor((v / max) * (SPARK_CHARS.length - 1)));
+      return SPARK_CHARS[Math.max(0, idx)];
+    })
+    .join('');
+}
+
 // --------------------------------------------------------------------------
 // Path resolution
 // --------------------------------------------------------------------------
 
 function resolveRepoRoot() {
-  // Priority order:
-  //   1. $AI_JOB_AGENT_ROOT       explicit override
-  //   2. ~/.claude/skills/ai-job-agent   gstack-style install (recommended)
-  //   3. ~/.claude/skills/ai-job-agent/REPO_PATH   marker file (legacy)
-  //   4. ~/ai-job-agent           fallback for manual clones
-  //   5. walk up from this script  last resort
   const candidates = [
     process.env.AI_JOB_AGENT_ROOT,
     path.join(os.homedir(), '.claude/skills/ai-job-agent'),
@@ -287,6 +306,30 @@ function followUpRows(outreach) {
     });
 }
 
+function rowsPerDay(rows, dateField, days = 14) {
+  const buckets = new Array(days).fill(0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (const r of rows) {
+    const d = r[dateField];
+    if (!d) continue;
+    const t = new Date(d);
+    if (isNaN(t.getTime())) continue;
+    t.setHours(0, 0, 0, 0);
+    const diff = Math.floor((today - t) / 86_400_000);
+    if (diff >= 0 && diff < days) buckets[days - 1 - diff] += 1;
+  }
+  return buckets;
+}
+
+function filterRows(rows, query, fields) {
+  if (!query) return rows;
+  const q = query.toLowerCase();
+  return rows.filter((r) =>
+    fields.some((f) => String(r[f] || '').toLowerCase().includes(q)),
+  );
+}
+
 // --------------------------------------------------------------------------
 // Table rendering
 // --------------------------------------------------------------------------
@@ -296,7 +339,7 @@ const TABLE = {
   h: '─', v: '│', cross: '┼', t: '┬', b: '┴', l: '├', r: '┤',
 };
 
-function renderTable({ title, columns, rows, highlight = -1 }) {
+function renderTable({ title, columns, rows, highlight = -1, rowColors = null }) {
   const widths = columns.map((c, i) => {
     const headerW = visibleWidth(c.label);
     const cellsW = rows.length
@@ -319,14 +362,18 @@ function renderTable({ title, columns, rows, highlight = -1 }) {
   );
   out.push(color(ANSI.dim, mid));
   rows.forEach((r, ri) => {
-    const inv = ri === highlight ? ANSI.inv : '';
+    const isHighlighted = ri === highlight;
+    const rowColor = rowColors ? rowColors[ri] : '';
+    const wrapper = (cell) => {
+      let s = ' ' + cell + ' ';
+      if (rowColor) s = rowColor + s + ANSI.reset;
+      if (isHighlighted) s = ANSI.inv + s + ANSI.reset;
+      return s;
+    };
     out.push(
       color(ANSI.dim, TABLE.v) +
         columns
-          .map((c, i) => {
-            const cell = ' ' + pad(r[i] ?? '', widths[i], c.align) + ' ';
-            return inv ? color(inv, cell) : cell;
-          })
+          .map((c, i) => wrapper(pad(r[i] ?? '', widths[i], c.align)))
           .join(color(ANSI.dim, TABLE.v)) +
         color(ANSI.dim, TABLE.v),
     );
@@ -339,7 +386,8 @@ function renderTable({ title, columns, rows, highlight = -1 }) {
 // Views
 // --------------------------------------------------------------------------
 
-function viewApplications(applications, scroll) {
+function viewApplications(applications, scroll, opts = {}) {
+  const { filter = '', highlight = -1, narrow = false } = opts;
   const counts = statusCounts(applications);
   const total = applications.length;
   const countRows = Object.entries(counts)
@@ -347,40 +395,71 @@ function viewApplications(applications, scroll) {
     .map(([status, n]) => [`${statusEmoji(status)} ${status}`, String(n)]);
   countRows.push([color(ANSI.bold, 'total'), color(ANSI.bold, String(total))]);
 
-  const recent = [...applications]
-    .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
-    .slice(scroll, scroll + 15);
+  const filteredAll = filterRows(applications, filter, ['company', 'role', 'status', 'source', 'platform', 'location']);
+  const sorted = [...filteredAll].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const recent = sorted.slice(scroll, scroll + 15);
 
-  const detailRows = recent.map((r) => [
-    r.date || '-',
-    truncate(r.company || '-', 24),
-    truncate(r.role || '-', 28),
-    `${statusEmoji(r.status)} ${r.status || '-'}`,
-    truncate(r.source || r.platform || '-', 14),
-  ]);
+  const rowColors = recent.map((r) => {
+    const s = (r.status || '').toLowerCase();
+    if (s === 'rejected') return ANSI.dim;
+    if (s === 'offer') return ANSI.green + ANSI.bold;
+    if (s === 'interview') return ANSI.cyan;
+    return '';
+  });
 
-  return [
-    renderTable({
-      title: 'Applications — status breakdown',
-      columns: [{ label: 'Status', max: 18 }, { label: 'Count', align: 'right', min: 6 }],
-      rows: countRows,
-    }),
-    '',
-    renderTable({
-      title: `Applications — recent ${recent.length} of ${applications.length}`,
-      columns: [
-        { label: 'Date', max: 12 },
+  const cols = narrow
+    ? [
+        { label: 'Date', max: 11 },
+        { label: 'Company', max: 22 },
+        { label: 'Status', max: 18 },
+      ]
+    : [
+        { label: 'Date', max: 11 },
         { label: 'Company', max: 24 },
         { label: 'Role', max: 28 },
-        { label: 'Status', max: 20 },
+        { label: 'Status', max: 18 },
         { label: 'Source', max: 14 },
-      ],
-      rows: detailRows,
-    }),
-  ].join('\n');
+      ];
+
+  const detailRows = recent.map((r) =>
+    narrow
+      ? [r.date || '-', truncate(r.company || '-', 22), `${statusEmoji(r.status)} ${r.status || '-'}`]
+      : [
+          r.date || '-',
+          truncate(r.company || '-', 24),
+          truncate(r.role || '-', 28),
+          `${statusEmoji(r.status)} ${r.status || '-'}`,
+          truncate(r.source || r.platform || '-', 14),
+        ],
+  );
+
+  const filterTag = filter
+    ? color(ANSI.yellow, ` (filter: "${filter}" — ${filteredAll.length}/${applications.length})`)
+    : '';
+
+  return {
+    output: [
+      renderTable({
+        title: 'Applications — status breakdown',
+        columns: [{ label: 'Status', max: 18 }, { label: 'Count', align: 'right', min: 6 }],
+        rows: countRows,
+      }),
+      '',
+      renderTable({
+        title: `Applications — recent ${recent.length} of ${filteredAll.length}` + filterTag,
+        columns: cols,
+        rows: detailRows,
+        highlight,
+        rowColors,
+      }),
+    ].join('\n'),
+    visibleRows: recent,
+    totalRows: filteredAll.length,
+  };
 }
 
-function viewOutreach(outreach, scroll) {
+function viewOutreach(outreach, scroll, opts = {}) {
+  const { filter = '', highlight = -1, narrow = false } = opts;
   const total = outreach.length;
   const counts = statusCounts(outreach);
   const countRows = Object.entries(counts)
@@ -388,42 +467,72 @@ function viewOutreach(outreach, scroll) {
     .map(([s, n]) => [`${statusEmoji(s)} ${s}`, String(n)]);
   countRows.push([color(ANSI.bold, 'total'), color(ANSI.bold, String(total))]);
 
-  const recent = [...outreach]
-    .sort((a, b) => (b.sent_at || '').localeCompare(a.sent_at || ''))
-    .slice(scroll, scroll + 15);
+  const filteredAll = filterRows(outreach, filter, ['company', 'to_name', 'to_email', 'subject', 'status']);
+  const sorted = [...filteredAll].sort((a, b) => (b.sent_at || '').localeCompare(a.sent_at || ''));
+  const recent = sorted.slice(scroll, scroll + 15);
 
-  const detailRows = recent.map((r) => [
-    (r.sent_at || '-').slice(0, 10),
-    truncate(r.company || '-', 22),
-    truncate(r.to_name || '-', 22),
-    truncate(r.subject || '-', 32),
-    `${statusEmoji(r.status)} ${r.status || '-'}`,
-    `${r.follow_up_count || '0'}/2`,
-  ]);
+  const rowColors = recent.map((r) => {
+    const s = (r.status || '').toLowerCase();
+    if (s === 'replied') return ANSI.green;
+    if (s === 'bounced') return ANSI.red;
+    return '';
+  });
 
-  return [
-    renderTable({
-      title: 'Outreach — status breakdown',
-      columns: [{ label: 'Status', max: 16 }, { label: 'Count', align: 'right', min: 6 }],
-      rows: countRows,
-    }),
-    '',
-    renderTable({
-      title: `Outreach — recent ${recent.length} of ${outreach.length}`,
-      columns: [
-        { label: 'Sent', max: 12 },
+  const cols = narrow
+    ? [
+        { label: 'Sent', max: 11 },
+        { label: 'Company', max: 18 },
+        { label: 'Recipient', max: 16 },
+      ]
+    : [
+        { label: 'Sent', max: 11 },
         { label: 'Company', max: 22 },
         { label: 'Recipient', max: 22 },
-        { label: 'Subject', max: 32 },
-        { label: 'Status', max: 16 },
+        { label: 'Subject', max: 30 },
+        { label: 'Status', max: 14 },
         { label: 'FU', max: 5, align: 'right' },
-      ],
-      rows: detailRows,
-    }),
-  ].join('\n');
+      ];
+
+  const detailRows = recent.map((r) =>
+    narrow
+      ? [(r.sent_at || '-').slice(0, 10), truncate(r.company || '-', 18), truncate(r.to_name || '-', 16)]
+      : [
+          (r.sent_at || '-').slice(0, 10),
+          truncate(r.company || '-', 22),
+          truncate(r.to_name || '-', 22),
+          truncate(r.subject || '-', 30),
+          `${statusEmoji(r.status)} ${r.status || '-'}`,
+          `${r.follow_up_count || '0'}/2`,
+        ],
+  );
+
+  const filterTag = filter
+    ? color(ANSI.yellow, ` (filter: "${filter}" — ${filteredAll.length}/${outreach.length})`)
+    : '';
+
+  return {
+    output: [
+      renderTable({
+        title: 'Outreach — status breakdown',
+        columns: [{ label: 'Status', max: 16 }, { label: 'Count', align: 'right', min: 6 }],
+        rows: countRows,
+      }),
+      '',
+      renderTable({
+        title: `Outreach — recent ${recent.length} of ${filteredAll.length}` + filterTag,
+        columns: cols,
+        rows: detailRows,
+        highlight,
+        rowColors,
+      }),
+    ].join('\n'),
+    visibleRows: recent,
+    totalRows: filteredAll.length,
+  };
 }
 
-function viewFollowups(outreach, scroll) {
+function viewFollowups(outreach, scroll, opts = {}) {
+  const { filter = '', highlight = -1, narrow = false } = opts;
   const all = followUpRows(outreach);
   const bucketCounts = { overdue: 0, due: 0, soon: 0, waiting: 0 };
   for (const x of all) bucketCounts[x.urgency.bucket] += 1;
@@ -434,46 +543,239 @@ function viewFollowups(outreach, scroll) {
   ]);
   summary.push([color(ANSI.bold, 'needs follow-up'), color(ANSI.bold, String(all.length))]);
 
-  const visible = all.slice(scroll, scroll + 15);
+  const filtered = filter
+    ? all.filter((x) => {
+        const q = filter.toLowerCase();
+        return ['company', 'to_name', 'subject'].some((f) =>
+          String(x.row[f] || '').toLowerCase().includes(q),
+        );
+      })
+    : all;
+
+  const visible = filtered.slice(scroll, scroll + 15);
+  const rowColors = visible.map((x) => URGENCY_COLOR[x.urgency.bucket] || '');
+
+  const cols = narrow
+    ? [
+        { label: '#', align: 'right', min: 3 },
+        { label: 'Urg', max: 12 },
+        { label: 'Days', align: 'right', min: 5 },
+        { label: 'Company', max: 18 },
+        { label: 'Name', max: 16 },
+      ]
+    : [
+        { label: '#', align: 'right', min: 3 },
+        { label: 'Urgency', max: 14 },
+        { label: 'Days', align: 'right', min: 5 },
+        { label: 'Company', max: 22 },
+        { label: 'Name', max: 22 },
+        { label: 'Round', align: 'right', min: 6 },
+        { label: 'Subject', max: 30 },
+        { label: 'Sent', max: 11 },
+      ];
+
   const detailRows = visible.map((x, i) => {
     const r = x.row;
     const fc = Number(r.follow_up_count || 0);
-    return [
-      String(scroll + i + 1),
-      `${URGENCY_EMOJI[x.urgency.bucket]} ${x.urgency.bucket}`,
-      String(x.urgency.days),
-      truncate(r.company || '-', 22),
-      truncate(r.to_name || '-', 22),
-      `${fc + 1}/2`,
-      truncate(r.subject || '-', 34),
-      (r.sent_at || '-').slice(0, 10),
-    ];
+    return narrow
+      ? [
+          String(scroll + i + 1),
+          `${URGENCY_EMOJI[x.urgency.bucket]} ${x.urgency.bucket}`,
+          String(x.urgency.days),
+          truncate(r.company || '-', 18),
+          truncate(r.to_name || '-', 16),
+        ]
+      : [
+          String(scroll + i + 1),
+          `${URGENCY_EMOJI[x.urgency.bucket]} ${x.urgency.bucket}`,
+          String(x.urgency.days),
+          truncate(r.company || '-', 22),
+          truncate(r.to_name || '-', 22),
+          `${fc + 1}/2`,
+          truncate(r.subject || '-', 30),
+          (r.sent_at || '-').slice(0, 10),
+        ];
   });
 
-  return [
-    renderTable({
-      title: 'Follow-ups — 7-day cadence, max 2 per contact',
-      columns: [{ label: 'Bucket', max: 14 }, { label: 'Count', align: 'right', min: 6 }],
-      rows: summary,
-    }),
-    '',
-    all.length === 0
-      ? color(ANSI.dim, '  (nothing to follow up on right now)\n')
-      : renderTable({
-          title: `Due now — ${visible.length} of ${all.length}`,
-          columns: [
-            { label: '#', align: 'right', min: 3 },
-            { label: 'Urgency', max: 14 },
-            { label: 'Days', align: 'right', min: 5 },
-            { label: 'Company', max: 22 },
-            { label: 'Name', max: 22 },
-            { label: 'Round', align: 'right', min: 6 },
-            { label: 'Subject', max: 34 },
-            { label: 'Sent', max: 12 },
-          ],
-          rows: detailRows,
-        }),
-  ].join('\n');
+  const filterTag = filter
+    ? color(ANSI.yellow, ` (filter: "${filter}" — ${filtered.length}/${all.length})`)
+    : '';
+
+  return {
+    output: [
+      renderTable({
+        title: 'Follow-ups — 7-day cadence, max 2 per contact',
+        columns: [{ label: 'Bucket', max: 14 }, { label: 'Count', align: 'right', min: 6 }],
+        rows: summary,
+      }),
+      '',
+      filtered.length === 0
+        ? color(ANSI.dim, '  (nothing to follow up on right now)\n')
+        : renderTable({
+            title: `Due now — ${visible.length} of ${filtered.length}` + filterTag,
+            columns: cols,
+            rows: detailRows,
+            highlight,
+            rowColors,
+          }),
+    ].join('\n'),
+    visibleRows: visible.map((x) => x.row),
+    totalRows: filtered.length,
+  };
+}
+
+function viewPipeline(applications, outreach) {
+  const counts = statusCounts(applications);
+  const stages = ['applied', 'submitted', 'interview', 'offer'];
+  const stageCounts = {};
+  for (const s of stages) stageCounts[s] = counts[s] || 0;
+
+  const total = applications.length;
+  const rejected = counts.rejected || 0;
+  const blocked = counts.blocked || 0;
+  const withdrawn = counts.withdrawn || 0;
+
+  // Last-14-day sparklines
+  const apps14 = rowsPerDay(applications, 'date', 14);
+  const out14 = rowsPerDay(outreach, 'sent_at', 14);
+  const apps14Total = apps14.reduce((a, b) => a + b, 0);
+  const out14Total = out14.reduce((a, b) => a + b, 0);
+
+  // Funnel rows
+  const funnelLines = [];
+  funnelLines.push(color(ANSI.bold + ANSI.cyan, 'Pipeline funnel — all-time'));
+  funnelLines.push('');
+
+  const stageEmoji = { applied: '📄', submitted: '📬', interview: '💼', offer: '🎯' };
+
+  let prev = total;
+  for (let i = 0; i < stages.length; i += 1) {
+    const stage = stages[i];
+    const n = stageCounts[stage];
+    const rate = prev > 0 ? Math.round((n / prev) * 100) : 0;
+    const bar = ' '.repeat(Math.max(0, 26 - Math.floor((n / Math.max(total, 1)) * 26))) +
+      color(ANSI.bg.cyan + ANSI.black, ' '.repeat(Math.floor((n / Math.max(total, 1)) * 26)));
+    funnelLines.push(`  ${stageEmoji[stage]} ${pad(stage, 12)} ${pad(String(n), 4, 'right')}   ${bar}  ${color(ANSI.dim, `(${rate}% from ${stages[i - 1] || 'total'})`)}`);
+    if (i < stages.length - 1) {
+      funnelLines.push(color(ANSI.dim, `        │`));
+      funnelLines.push(color(ANSI.dim, `        ▼`));
+    }
+    prev = n;
+  }
+
+  if (stageCounts.offer > 0) {
+    funnelLines.push('');
+    funnelLines.push(color(ANSI.bold + ANSI.green, '   🎉 ' + stageCounts.offer + ' offer(s) — congrats'));
+  }
+
+  funnelLines.push('');
+  funnelLines.push(color(ANSI.bold + ANSI.cyan, 'Closed paths'));
+  funnelLines.push('');
+  funnelLines.push(`  ${color(ANSI.red, '❌ rejected ')} ${pad(String(rejected), 4, 'right')}   ${color(ANSI.dim, `(${total > 0 ? Math.round((rejected / total) * 100) : 0}% rejection rate)`)}`);
+  funnelLines.push(`  ${color(ANSI.dim, '🚫 blocked  ')} ${pad(String(blocked), 4, 'right')}   ${color(ANSI.dim, '(captcha / pre-filtered)')}`);
+  funnelLines.push(`  ${color(ANSI.dim, '🚪 withdrawn')} ${pad(String(withdrawn), 4, 'right')}`);
+
+  funnelLines.push('');
+  funnelLines.push(color(ANSI.bold + ANSI.cyan, 'Last 14 days — daily activity'));
+  funnelLines.push('');
+  funnelLines.push(`  📄 applications  ${pad(String(apps14Total), 4, 'right')}   ${color(ANSI.cyan, sparkline(apps14))}`);
+  funnelLines.push(`  ✉️  cold emails   ${pad(String(out14Total), 4, 'right')}   ${color(ANSI.cyan, sparkline(out14))}`);
+
+  return {
+    output: funnelLines.join('\n'),
+    visibleRows: [],
+    totalRows: 0,
+  };
+}
+
+// --------------------------------------------------------------------------
+// Detail pane (shown on the right when state.detailRow is set)
+// --------------------------------------------------------------------------
+
+function renderDetailPane(row, sourceKey, height) {
+  if (!row) return '';
+  const lines = [];
+  lines.push(color(ANSI.bold + ANSI.cyan, '─── Detail '.padEnd(60, '─')));
+  lines.push('');
+
+  const fields = sourceKey === 'applications'
+    ? ['date', 'company', 'role', 'status', 'location', 'source', 'platform', 'applied_by', 'url', 'notes', 'contact', 'compensation']
+    : ['sent_at', 'company', 'role', 'to_name', 'to_email', 'to_title', 'to_linkedin', 'subject', 'body_file', 'message_id', 'status', 'replied_at', 'follow_up_count', 'last_follow_up_at', 'notes'];
+
+  for (const f of fields) {
+    const v = row[f];
+    if (!v) continue;
+    const label = color(ANSI.bold, pad(f, 18));
+    let displayValue = String(v);
+    if (f === 'status') displayValue = `${statusEmoji(v)} ${v}`;
+    if (f === 'url' || f === 'to_linkedin') displayValue = color(ANSI.blue + ANSI.bold, displayValue);
+    if (f === 'notes') {
+      // Wrap long notes
+      const wrapped = displayValue.match(/.{1,55}(\s|$)/g) || [displayValue];
+      lines.push(`  ${label} ${wrapped[0]}`);
+      for (let i = 1; i < wrapped.length; i += 1) {
+        lines.push(`  ${' '.repeat(18)} ${wrapped[i]}`);
+      }
+    } else {
+      lines.push(`  ${label} ${truncate(displayValue, 55)}`);
+    }
+  }
+
+  lines.push('');
+  lines.push(color(ANSI.dim, '  Press esc or enter to close'));
+
+  return lines.join('\n');
+}
+
+// --------------------------------------------------------------------------
+// Help overlay (centered modal box)
+// --------------------------------------------------------------------------
+
+function renderHelpOverlay(termRows, termCols) {
+  const helpLines = [
+    [color(ANSI.bold + ANSI.cyan, 'AI Job Agent Dashboard — keybindings')],
+    [''],
+    ['Navigation'],
+    ['  tab / →     ', 'next tab'],
+    ['  ←           ', 'previous tab'],
+    ['  1 2 3 4    ', 'jump to tab (Apps · Outreach · Follow-ups · Pipeline)'],
+    ['  ↑ ↓ j k    ', 'scroll rows up / down'],
+    [''],
+    ['Filtering'],
+    ['  /           ', 'fuzzy filter on current tab (type to filter, esc to clear)'],
+    [''],
+    ['Detail view'],
+    ['  enter       ', 'open detail pane for the highlighted row'],
+    ['  esc         ', 'close detail pane'],
+    [''],
+    ['Other'],
+    ['  r           ', 'reload from disk (auto-reload also fires on file change)'],
+    ['  ?           ', 'toggle this help overlay'],
+    ['  q / Ctrl-C  ', 'quit'],
+    [''],
+    [color(ANSI.dim, 'Press any key to dismiss')],
+  ];
+
+  const width = 64;
+  const innerW = width - 4;
+  const boxLines = helpLines.map((parts) => {
+    const text = parts.length === 1 ? parts[0] : color(ANSI.bold, parts[0]) + parts[1];
+    return color(ANSI.dim, TABLE.v) + ' ' + pad(text, innerW) + ' ' + color(ANSI.dim, TABLE.v);
+  });
+  const top = color(ANSI.dim, TABLE.tl + TABLE.h.repeat(width - 2) + TABLE.tr);
+  const bot = color(ANSI.dim, TABLE.bl + TABLE.h.repeat(width - 2) + TABLE.br);
+
+  const totalH = boxLines.length + 2;
+  const startRow = Math.max(2, Math.floor((termRows - totalH) / 2));
+  const startCol = Math.max(1, Math.floor((termCols - width) / 2));
+
+  const out = [];
+  out.push(`\x1b[${startRow};${startCol}H${top}`);
+  boxLines.forEach((l, i) => {
+    out.push(`\x1b[${startRow + 1 + i};${startCol}H${l}`);
+  });
+  out.push(`\x1b[${startRow + 1 + boxLines.length};${startCol}H${bot}`);
+  return out.join('');
 }
 
 // --------------------------------------------------------------------------
@@ -488,11 +790,12 @@ function printSnapshot(data) {
     process.stdout.write(color(ANSI.red, `  error: ${applications.error || outreach.error}\n`));
     return;
   }
-  process.stdout.write(viewApplications(applications, 0) + '\n\n');
-  process.stdout.write(viewOutreach(outreach, 0) + '\n\n');
-  process.stdout.write(viewFollowups(outreach, 0) + '\n\n');
+  process.stdout.write(viewApplications(applications, 0).output + '\n\n');
+  process.stdout.write(viewOutreach(outreach, 0).output + '\n\n');
+  process.stdout.write(viewFollowups(outreach, 0).output + '\n\n');
+  process.stdout.write(viewPipeline(applications, outreach).output + '\n\n');
   process.stdout.write(
-    color(ANSI.dim, '  For live interactive view: run `npm run dashboard` in a terminal tab.\n'),
+    color(ANSI.dim, '  For live interactive view: run `npm run dashboard` in a terminal tab. Press ? once running for keybinds.\n'),
   );
 }
 
@@ -504,6 +807,7 @@ const TABS = [
   { key: 'applications', label: 'Applications', render: viewApplications, source: 'applications' },
   { key: 'outreach', label: 'Outreach', render: viewOutreach, source: 'outreach' },
   { key: 'followups', label: 'Follow-ups', render: viewFollowups, source: 'outreach' },
+  { key: 'pipeline', label: 'Pipeline', render: viewPipeline, source: 'pipeline' },
 ];
 
 function runInteractive(initialData, root) {
@@ -519,9 +823,18 @@ function runInteractive(initialData, root) {
   let state = {
     tab: 0,
     scroll: 0,
+    cursor: 0,           // index into the current tab's visible rows
     ...initialData,
     lastLoaded: new Date(),
+    helpVisible: false,
+    filterMode: false,
+    filterQuery: '',
+    detailRow: null,     // the row object being inspected; null means no detail pane
   };
+
+  let lastViewMeta = { visibleRows: [], totalRows: 0 };
+  let watchTimer = null;
+  let watchers = [];
 
   const reload = () => {
     const applications = loadCSV(path.join(root, 'application-tracker.csv'));
@@ -531,10 +844,37 @@ function runInteractive(initialData, root) {
     state.lastLoaded = new Date();
   };
 
+  // Auto-reload when CSVs change. Debounce: fs.watch fires multiple times per save.
+  const setupWatchers = () => {
+    const csvs = [
+      path.join(root, 'application-tracker.csv'),
+      path.join(root, 'outreach-log.csv'),
+    ];
+    for (const p of csvs) {
+      if (!fs.existsSync(p)) continue;
+      try {
+        const w = fs.watch(p, () => {
+          if (watchTimer) clearTimeout(watchTimer);
+          watchTimer = setTimeout(() => {
+            reload();
+            draw();
+          }, 200);
+        });
+        watchers.push(w);
+      } catch (_) {
+        // Ignore watch errors — manual `r` still works.
+      }
+    }
+  };
+
   process.stdout.write(ANSI.alt + ANSI.hideCursor);
 
   const cleanup = () => {
     process.stdout.write(ANSI.showCursor + ANSI.altOff);
+    for (const w of watchers) {
+      try { w.close(); } catch (_) { /* noop */ }
+    }
+    if (watchTimer) clearTimeout(watchTimer);
     try {
       process.stdin.setRawMode(false);
     } catch (_) {
@@ -546,6 +886,10 @@ function runInteractive(initialData, root) {
   const draw = () => {
     const cols = process.stdout.columns || 120;
     const rows = process.stdout.rows || 40;
+    const narrow = cols < 100;
+    const splitPane = state.detailRow != null && cols >= 120;
+    const listWidth = splitPane ? Math.floor(cols * 0.55) : cols;
+
     process.stdout.write(ANSI.clear);
 
     // Header
@@ -563,23 +907,67 @@ function runInteractive(initialData, root) {
 
     // Current tab content
     const current = TABS[state.tab];
-    const data = state[current.source];
-    if (data && data.error) {
-      process.stdout.write(color(ANSI.red, `  error reading ${current.source}: ${data.error}\n`));
+    let viewResult;
+    if (current.key === 'pipeline') {
+      viewResult = viewPipeline(state.applications, state.outreach);
     } else {
-      process.stdout.write(current.render(data || [], state.scroll) + '\n');
+      const data = state[current.source];
+      if (data && data.error) {
+        process.stdout.write(color(ANSI.red, `  error reading ${current.source}: ${data.error}\n`));
+        viewResult = { output: '', visibleRows: [], totalRows: 0 };
+      } else {
+        viewResult = current.render(data || [], state.scroll, {
+          filter: state.filterQuery,
+          highlight: state.cursor,
+          narrow: splitPane || narrow,
+        });
+      }
     }
 
-    // Footer
-    const reloaded = state.lastLoaded.toLocaleTimeString();
-    const footer =
-      `  ${color(ANSI.dim, 'loaded')} ${reloaded}   ` +
-      `${color(ANSI.bold, '[tab/←→]')} switch tab   ` +
-      `${color(ANSI.bold, '[↑↓/j/k]')} scroll   ` +
-      `${color(ANSI.bold, '[r]')} reload   ` +
-      `${color(ANSI.bold, '[q]')} quit`;
-    // Position footer at last row
-    process.stdout.write(`\x1b[${rows};1H` + footer);
+    lastViewMeta = { visibleRows: viewResult.visibleRows, totalRows: viewResult.totalRows };
+
+    // Render the main view (constrained to listWidth if split-pane)
+    process.stdout.write(viewResult.output + '\n');
+
+    // Right-side detail pane
+    if (splitPane && state.detailRow) {
+      const detailLines = renderDetailPane(state.detailRow, current.source, rows - 8).split('\n');
+      detailLines.forEach((line, i) => {
+        process.stdout.write(`\x1b[${4 + i};${listWidth + 2}H${line}`);
+      });
+    }
+
+    // Footer — context-aware keybinds
+    const footerY = rows;
+    let footer;
+    if (state.filterMode) {
+      footer =
+        color(ANSI.bg.yellow + ANSI.black, ' FILTER ') +
+        ` ${state.filterQuery}${color(ANSI.bold, '_')}    ` +
+        color(ANSI.dim, '[enter] confirm  [esc] cancel');
+    } else if (state.detailRow) {
+      footer =
+        `  ${color(ANSI.dim, 'detail')}   ` +
+        `${color(ANSI.bold, '[esc/enter]')} close   ` +
+        `${color(ANSI.bold, '[?]')} help   ` +
+        `${color(ANSI.bold, '[q]')} quit`;
+    } else {
+      const reloaded = state.lastLoaded.toLocaleTimeString();
+      const tabHint = current.key === 'pipeline'
+        ? `${color(ANSI.bold, '[tab/←→]')} switch tab`
+        : `${color(ANSI.bold, '[/]')} filter   ${color(ANSI.bold, '[enter]')} detail`;
+      footer =
+        `  ${color(ANSI.dim, 'loaded')} ${reloaded}   ` +
+        `${tabHint}   ` +
+        `${color(ANSI.bold, '[?]')} help   ` +
+        `${color(ANSI.bold, '[q]')} quit`;
+    }
+    process.stdout.write(`\x1b[${footerY};1H` + footer);
+
+    // Help overlay last so it's on top
+    if (state.helpVisible) {
+      process.stdout.write(renderHelpOverlay(rows, cols));
+    }
   };
 
   process.stdin.setRawMode(true);
@@ -588,23 +976,118 @@ function runInteractive(initialData, root) {
 
   process.stdin.on('keypress', (ch, key) => {
     if (!key) return;
-    if (key.name === 'q' || key.name === 'escape' || (key.ctrl && key.name === 'c')) {
+
+    // Filter mode captures everything (text input)
+    if (state.filterMode) {
+      if (key.name === 'escape') {
+        state.filterMode = false;
+        state.filterQuery = '';
+        state.cursor = 0;
+        state.scroll = 0;
+      } else if (key.name === 'return') {
+        state.filterMode = false;
+        state.cursor = 0;
+        state.scroll = 0;
+      } else if (key.name === 'backspace') {
+        state.filterQuery = state.filterQuery.slice(0, -1);
+        state.cursor = 0;
+        state.scroll = 0;
+      } else if (key.ctrl && key.name === 'c') {
+        cleanup();
+        process.exit(0);
+      } else if (ch && ch.length === 1 && !key.ctrl && !key.meta) {
+        state.filterQuery += ch;
+        state.cursor = 0;
+        state.scroll = 0;
+      } else {
+        return;
+      }
+      draw();
+      return;
+    }
+
+    // Help overlay: any key dismisses (except quit)
+    if (state.helpVisible) {
+      if (key.ctrl && key.name === 'c') { cleanup(); process.exit(0); }
+      if (key.name === 'q') { cleanup(); process.exit(0); }
+      state.helpVisible = false;
+      draw();
+      return;
+    }
+
+    // Quit
+    if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
       cleanup();
       process.exit(0);
     }
+
+    // Detail pane: esc closes; arrows / enter still navigate
+    if (state.detailRow) {
+      if (key.name === 'escape' || key.name === 'return') {
+        state.detailRow = null;
+        draw();
+        return;
+      }
+    }
+
+    if (key.name === 'escape') {
+      // No-op when nothing to dismiss; future: could close detail or filter.
+      return;
+    }
+
+    if (key.name === '?' || ch === '?') {
+      state.helpVisible = true;
+      draw();
+      return;
+    }
+
+    if (key.name === '/' || ch === '/') {
+      state.filterMode = true;
+      draw();
+      return;
+    }
+
+    if (key.name === 'return') {
+      // Open detail pane for highlighted row
+      const visible = lastViewMeta.visibleRows;
+      if (visible.length > 0) {
+        const idx = Math.min(state.cursor, visible.length - 1);
+        state.detailRow = visible[idx];
+        draw();
+      }
+      return;
+    }
+
     if (key.name === 'tab' || key.name === 'right') {
       state.tab = (state.tab + 1) % TABS.length;
       state.scroll = 0;
+      state.cursor = 0;
+      state.filterQuery = '';
     } else if (key.name === 'left') {
       state.tab = (state.tab - 1 + TABS.length) % TABS.length;
       state.scroll = 0;
-    } else if (ch === '1' || ch === '2' || ch === '3') {
+      state.cursor = 0;
+      state.filterQuery = '';
+    } else if (ch === '1' || ch === '2' || ch === '3' || ch === '4') {
       state.tab = Math.min(TABS.length - 1, Number(ch) - 1);
       state.scroll = 0;
+      state.cursor = 0;
+      state.filterQuery = '';
     } else if (key.name === 'down' || key.name === 'j') {
-      state.scroll += 1;
+      state.cursor += 1;
+      const visible = lastViewMeta.visibleRows.length;
+      if (state.cursor >= visible && state.scroll + visible < lastViewMeta.totalRows) {
+        state.scroll += 1;
+        state.cursor = visible - 1;
+      } else if (state.cursor >= visible) {
+        state.cursor = Math.max(0, visible - 1);
+      }
     } else if (key.name === 'up' || key.name === 'k') {
-      state.scroll = Math.max(0, state.scroll - 1);
+      if (state.cursor > 0) {
+        state.cursor -= 1;
+      } else if (state.scroll > 0) {
+        state.scroll -= 1;
+      }
     } else if (key.name === 'r') {
       reload();
     } else {
@@ -619,6 +1102,7 @@ function runInteractive(initialData, root) {
     process.exit(0);
   });
 
+  setupWatchers();
   draw();
 }
 
