@@ -33,6 +33,12 @@ Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 9 skills as s
 
 Skills find this repo via `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`. Set the env var or rerun `install.sh` from a non-default clone location.
 
+## Unified mode — `npm run agent`
+
+Daily driver. Opens Claude Code chat (top pane) + live TUI dashboard (bottom pane) in one terminal window via tmux. They auto-sync via fs.watch — anything Claude does in chat that touches `application-tracker.csv` or `outreach-log.csv` re-renders the dashboard within ~200ms.
+
+Launcher: `bin/job-agent.sh`. If `tmux` isn't installed it offers to `brew install tmux` (macOS) or `apt install tmux` (Linux) with a one-key confirmation. On decline, falls back to opening two Terminal/iTerm tabs (macOS) or printing manual instructions (Linux).
+
 ## Configuration
 
 All personal details are in the `config/` directory:

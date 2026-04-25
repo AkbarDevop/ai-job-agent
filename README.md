@@ -86,6 +86,22 @@ Requirements: [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Git
 
 Claude does the rest — clones into `~/.claude/skills/ai-job-agent/`, registers all 9 skills globally, writes the coach-first routing block into your CLAUDE.md, runs `/job-setup` (identity, resume, optional msmtp), and drops you into `/job-coach intake` (target roles, companies, timeline, geography — builds the live search plan).
 
+### Daily driver: `npm run agent` (unified Claude + live TUI)
+
+After install, the recommended way to actually use this is:
+
+```bash
+cd ~/.claude/skills/ai-job-agent && npm run agent
+```
+
+That opens a single terminal window with **Claude Code on top** and the **live TUI dashboard on bottom** (split via tmux). They auto-sync — flip a status in chat ("got rejected from X") and watch the funnel update in the bottom pane within ~200ms. No tab switching, no manual reloads.
+
+If `tmux` isn't installed, the launcher offers to `brew install` (macOS) or `apt install` (Linux) it for you with one keypress — strongly recommended for the unified experience. On decline, it falls back to opening two terminal tabs (macOS) or printing instructions (Linux).
+
+You can still run them separately if you want:
+- `claude` alone → just chat
+- `npm run dashboard` alone → just the live TUI
+
 ### Want to hack on the skills?
 
 If you're modifying the skill prompts or scripts, clone normally and the `install.sh` handles it:
@@ -311,6 +327,8 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- answer-bank.template.md        # answer bank template
 |   |-- linkedin-config.template.json  # linkedin config template
 |   +-- example-config.json            # filled example
+|-- bin/
+|   +-- job-agent.sh                   # `npm run agent` — unified Claude + TUI launcher (tmux)
 |-- scripts/
 |   |-- linkedin-easy-apply.js         # LinkedIn Easy Apply automation
 |   |-- lever-apply.js                 # Lever ATS automation
