@@ -24,6 +24,10 @@ Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). 
 | `/job-outreach <target>` | `send-cold-email.js` + Claude (the agent drafts) | research → draft preview → dry-run → send → log to `outreach-log.csv` |
 | `/job-followup [send]` | `outreach-log.csv` + `send-cold-email.js` | urgency table (overdue/due/soon/waiting) + optional step-through send |
 | `/job-dashboard [live]` | `job-dashboard.mjs` (zero deps) | ANSI tables: applications + outreach + follow-ups. Snapshot in chat or `npm run dashboard` for live TUI |
+| `/job-evaluate <url>` | WebFetch + 7-block A-G rubric + `/job-cv` chain + tracker append | structured eval report at `reports/<date>-<company>-<role>.md` + tailored PDF + tracker row |
+| `/job-cv <jd>` | `scripts/generate-tailored-cv.mjs` (Playwright Chromium → PDF) | Claude rewrites base CV (no invention) → ATS-friendly PDF at `output/cv-<company>-<date>.pdf` |
+| `/job-interview <company>` | `application-tracker.csv` + WebSearch + WebFetch | company snapshot + 10-15 likely Qs + 5-8 STAR stories from real projects + 5 smart asks + 3 red flags |
+| `/job-patterns` | `application-tracker.csv` + `outreach-log.csv` | rejection diagnostics (by ATS / time-to-rej / geography / role-type / day-of-week) + 3 actionable fixes |
 
 **First-run flow (gstack-style):** open Claude Code anywhere and paste this one message:
 
@@ -165,7 +169,7 @@ All application scripts use consistent exit codes:
 
 ## Recommended Companion Skills
 
-The skills below are community-built and complement the 9 bundled skills above:
+The skills below are community-built and complement the 13 bundled skills above:
 
 - `/job-search` -- Multi-board job search
 - `/tailor-resume` -- Resume customization per posting
@@ -187,7 +191,7 @@ This repo pairs well with [gstack](https://github.com/garrytan/gstack) — a gen
 - **Dev-experience:** `/devex-review` after shipping a new skill — it actually runs the install + first-skill-invocation and scores the onboarding. `/plan-devex-review` before adding new skills.
 - **Post-ship:** `/document-release` to sync `README.md` / `CLAUDE.md` / `skills/README.md` after a skill lands. `/retro` for the weekly "what did we ship" log.
 
-If gstack isn't installed, those skills are optional — this repo's 9 bundled skills (`/job-coach`, `/job-setup`, `/job-apply`, `/job-track`, `/job-triage`, `/job-status`, `/job-outreach`, `/job-followup`, `/job-dashboard`) work standalone.
+If gstack isn't installed, those skills are optional — this repo's 13 bundled skills (`/job-coach`, `/job-setup`, `/job-apply`, `/job-track`, `/job-triage`, `/job-status`, `/job-outreach`, `/job-followup`, `/job-dashboard`) work standalone.
 
 ## File Locations
 

@@ -33,3 +33,17 @@ config/search-plan.md
 # Chrome profiles
 chrome-data/
 package-lock.json
+.gstack/
+
+# /job-evaluate output (per-role evaluation reports)
+reports/
+
+# /job-cv generated PDFs (tailored resumes per job)
+output/
+
+# Markdown tracker mirror (auto-generated from CSVs by `npm run mirror`)
+data/applications.md
+data/outreach.md
+
+# /job-interview prep notes (personal — interview research)
+interview-prep/

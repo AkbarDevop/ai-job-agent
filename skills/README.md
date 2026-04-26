@@ -1,6 +1,6 @@
 # Claude Code Skills for Job Hunting
 
-This toolkit ships with 9 bundled skills — a persona-driven orchestrator (`/job-coach`) plus 8 verbs that do the actual work. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with 13 bundled skills — a persona-driven orchestrator (`/job-coach`) plus 8 verbs that do the actual work. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
 
 ---
 
@@ -35,6 +35,15 @@ These live inside this repo at `skills/<name>/SKILL.md` and wrap the existing No
 |-------|--------------|-------|
 | `/job-outreach <target>` | Research a company/person, draft a personalized cold email in-chat, approve, send via local msmtp, log. | `send-cold-email.js` + Claude (the LLM is *this* agent — no external API) |
 | `/job-followup [send]` | Read `outreach-log.csv`, compute urgency using a 7-day cadence, walk follow-ups one at a time. Max 2 follow-ups per contact. | `outreach-log.csv` + `send-cold-email.js` |
+
+### Deep-dive + analysis (v1.2 — career-ops parity)
+
+| Skill | What it does | Wraps |
+|-------|--------------|-------|
+| `/job-evaluate <url>` | Auto-pipeline: fetch JD → score across 7-block A-G rubric → write report to `reports/` → generate tailored PDF → append tracker row. Career-ops's killer demo. | `WebFetch`, `WebSearch`, `/job-cv`, `application-tracker.csv` |
+| `/job-cv <jd>` | Tailor base CV for one specific JD (rewrite bullets, never invent), render ATS-friendly PDF. | `scripts/generate-tailored-cv.mjs` (Playwright Chromium → PDF) |
+| `/job-interview <company>` | Prep for an upcoming interview: company snapshot + likely Qs + STAR answers from candidate's actual projects + smart Qs to ask + red flags. | `application-tracker.csv` + `WebSearch`/`WebFetch` |
+| `/job-patterns` | Read tracker + outreach log, find rejection patterns (by ATS, by stage, by geography, by day-of-week), surface 3 actionable fixes. | `application-tracker.csv` + `outreach-log.csv` |
 
 See `docs/SETUP.md#cold-email-setup-msmtp--gmail` for manual msmtp configuration — or just run `/job-setup` and answer "yes" when it asks about cold email.
 

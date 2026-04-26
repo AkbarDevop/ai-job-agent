@@ -115,21 +115,35 @@ Narrate as you go:
 > Looking for VP Substation leads at those companies…
 > Paul Young (GFT, already in your tracker), Diana Ramirez-style pattern suggests an HR coordinator path at Evergy — found Lauren Hassinger as 2026 intern coordinator.
 
-### Step 4 — Present the slate
+### Step 4 — Present the slate (with structured A-G rubric)
 
-Render a ranked table. Fit score is a rough weighted combo of (role-match, company-match, location-match, recency). Keep it readable:
+For each candidate role, score it across 7 blocks (borrowed from career-ops). Each block scores 0-5; total is 0-35; the headline "Fit" shown to the user is `total ÷ 7` rounded to one decimal (a 0-5.0 scale, easier to scan than a 0-35 sum).
+
+| Block | What it measures | What 5/5 looks like |
+|-------|-----------------|---------------------|
+| **A. Role match** | Does the JD's day-to-day match the candidate's primary archetype from `search-plan.md`? | Exact match on title family + tech stack |
+| **B. CV match** | Do the JD's required skills appear in `candidate-profile.md`? | All required skills present, half the nice-to-haves too |
+| **C. Level fit** | Intern / new-grad / mid — matches the candidate's current career stage? | Posting names the exact level the candidate is at |
+| **D. Compensation** | Is comp at or above candidate's floor (from search-plan.md)? Is it disclosed? | Disclosed and ≥ 1.2× the floor |
+| **E. Personalization angle** | Is there a non-obvious hook the candidate could lead a cold email with? | Specific recent project / news / interview the candidate can reference |
+| **F. Interview signal** | Is the company known for fair, technical interviews vs leetcode-grinders or hostile loops? Read recent Glassdoor / Blind / Hacker News signal. | Reputation for thoughtful interviews + transparent process |
+| **G. Posting legitimacy** | Real role or ghost listing? Posted date, ATS-stale, requisition number, recruiter follow-through. | Posted ≤ 14 days, named hiring manager, real reqID |
+
+Render the slate with the scores broken out so the user can see *why* each row landed where it did:
 
 ```
-| # | Fit  | Role                             | Company      | Platform  | Suggested move         |
-|---|:----:|----------------------------------|--------------|-----------|------------------------|
-| 1 | 94%  | Substation Engineer Intern       | Ameren       | Greenhouse | /job-apply (direct)   |
-| 2 | 91%  | Power Systems Intern             | Evergy       | iCIMS     | /job-apply (careful — ATS) |
-| 3 | 88%  | Automation Intern                | ERIELL (UZ)  | email     | /job-outreach (HR dir) |
-| 4 | 82%  | EE Intern                        | Xcel         | Lever     | /job-apply             |
-| 5 | 76%  | SCADA Apprentice                 | Spire        | Workday   | /job-outreach (skip Workday) |
+| # | Fit  | A | B | C | D | E | F | G | Role                       | Company      | Suggested move         |
+|---|:----:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|----------------------------|--------------|------------------------|
+| 1 | 4.6  | 5 | 5 | 5 | 4 | 5 | 4 | 4 | Substation Engineer Intern | Ameren       | /job-apply (direct)    |
+| 2 | 4.3  | 5 | 4 | 5 | 4 | 4 | 4 | 4 | Power Systems Intern       | Evergy       | /job-apply             |
+| 3 | 4.1  | 4 | 4 | 5 | 3 | 5 | 4 | 4 | Automation Intern          | ERIELL (UZ)  | /job-outreach (HR dir) |
+| 4 | 3.7  | 5 | 4 | 5 | 2 | 3 | 3 | 4 | EE Intern                  | Xcel         | /job-apply             |
+| 5 | 3.0  | 3 | 3 | 4 | 2 | 4 | 3 | 2 | SCADA Apprentice           | Spire        | /job-outreach (skip)   |
 ```
 
-Every row has a suggested action. Group below the table into:
+Anything below **3.0 = drop or de-prioritize**. Anything **≥ 4.0 = high-confidence apply or outreach**. The user can ask "why did Evergy lose a point on D?" and you should be able to point at the specific block — that's the whole point of the rubric vs the old fuzzy %.
+
+Below the table, group into: Group below the table into:
 - **Suggested right now (3 concrete moves)** — e.g. "Apply to #1 + #2 in the next 15 min; draft outreach for #3."
 - **Save for later (2-3 rows)** — user can bookmark for next session.
 - **Skip / not a fit (1-2 rows)** — with a one-line why.
