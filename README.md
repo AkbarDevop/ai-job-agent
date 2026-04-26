@@ -57,7 +57,7 @@ You install it once. You tell it you want an internship. It interviews you for 5
     (coach runs /job-followup — 🚨 overdue first, draft + send one-by-one)
 ```
 
-Under the hood, there are **9 skills** (one orchestrator + 8 verbs) that wrap Node and Python scripts for LinkedIn Easy Apply, Greenhouse / Lever / Jobvite / Ashby, Outlook Web triage, Gmail msmtp, and a zero-dep terminal TUI. You can invoke them by slash command if you want explicit control. You rarely need to.
+Under the hood, there are **13 skills** (one orchestrator + 12 verbs) that wrap Node and Python scripts for LinkedIn Easy Apply, Greenhouse / Lever / Jobvite / Ashby, Outlook Web triage, Gmail msmtp, JD scoring with the 7-block A-G rubric, tailored-PDF rendering, interview prep, pattern analysis, and a zero-dep terminal TUI. You can invoke them by slash command if you want explicit control. You rarely need to.
 
 ---
 
@@ -84,7 +84,7 @@ Requirements: [Claude Code](https://docs.anthropic.com/en/docs/claude-code), Git
 >
 > Then tell me it's done and run /job-setup, and when that finishes chain straight into /job-coach intake so we have a real plan.
 
-Claude does the rest — clones into `~/.claude/skills/ai-job-agent/`, registers all 9 skills globally, writes the coach-first routing block into your CLAUDE.md, runs `/job-setup` (identity, resume, optional msmtp), and drops you into `/job-coach intake` (target roles, companies, timeline, geography — builds the live search plan).
+Claude does the rest — clones into `~/.claude/skills/ai-job-agent/`, registers all 13 skills globally, writes the coach-first routing block into your CLAUDE.md, runs `/job-setup` (identity, resume, optional msmtp), and drops you into `/job-coach intake` (target roles, companies, timeline, geography — builds the live search plan).
 
 ### Daily driver: `npm run agent` (unified Claude + live TUI)
 
@@ -184,41 +184,56 @@ The agent handoff system means you never re-explain context. Every session picks
 ## Architecture
 
 ```
-                    +------------------+
-                    |   Job Discovery  |
-                    | python-jobspy /  |
-                    | LinkedIn search  |
-                    +--------+---------+
-                             |
-                +------------+------------+
-                |                         |
-                v                         v
-  +-------------+--------------+  +------+--------+
-  |     Application Router     |  |   Networking   |
-  |  (Claude Code / manual)    |  |    Engine      |
-  +----+----+----+----+-------+  +--+----+----+--+
-       |    |    |    |            |    |       |
-  +----+    |    |    +----+       |    |       |
-  v         v    v         v       v    v       v
-+------+ +-----+ +------+ +-----+ +------+ +--------+
-|Linke-| |Lever| |Green-| |Jobv-| |Conn  | |Follow- |
-|din   | |Apply| |house | |ite/ | |Reqs  | |up DMs  |
-|Easy  | |     | |      | |Ashby| |      | |        |
-+------+ +-----+ +------+ +-----+ +------+ +--------+
-  |        |        |        |       |          |
-  +----+---+---+----+--------+       +----+-----+
-       |       |                          |
-       v       v                          v
- +----------+ +-----------+    +------------------+
- | Local CSV| | Google    |    | Market Research  |
- | Tracker  | | Sheets    |    | & Intl Outreach  |
- +----------+ +-----------+    +------------------+
-       |
-       v
- +-----------+
- | Outlook   |
- | Triage    |
- +-----------+
+                                +-----------------+
+                                |   /job-coach    |   <-- you talk to this
+                                |  (orchestrator) |
+                                +--------+--------+
+                                         | dispatches into the verbs below
+        +--------------------------------+--------------------------------+
+        |              |               |               |                  |
+        v              v               v               v                  v
+  +-----+-----+  +-----+----+  +-------+------+  +-----+-----+  +---------+--------+
+  |/job-setup |  |/job-eval |  | /job-apply   |  |/job-cv    |  |/job-outreach     |
+  |onboarding |  |+ rubric  |  |  + ATS route |  |  + PDF    |  | + send-cold-email|
+  +-----+-----+  +----+-----+  +-------+------+  +-----+-----+  +---------+--------+
+                      |                |                |                 |
+                      |          +-----+-------+        |          +------+-------+
+                      |          | LinkedIn /  |        |          | /job-followup|
+                      |          | Greenhouse /|        |          | (day-7 cadence)
+                      |          | Lever /     |        |          +------+-------+
+                      |          | Jobvite /   |        |                 |
+                      |          | Ashby       |        |                 |
+                      |          +-----+-------+        |                 |
+                      |                |                |                 |
+                      v                v                v                 v
+              +-------+----------------+----------------+-----------------+--------+
+              |                                                                    |
+              |              application-tracker.csv  +  outreach-log.csv          |
+              |              (CSVs are the source of truth)                        |
+              +-------+----------------+----------------+-----------------+--------+
+                      |                |                                  |
+                      v                v                                  v
+           +----------+----------+   +-+--------------+        +----------+----------+
+           | mirror-tracker.mjs  |   | google-sheet-  |        | /job-status         |
+           | -> data/*.md        |   | sync.py        |        | (batch flips)       |
+           +----------+----------+   +----------------+        +---------------------+
+                      |
+                      v
+              +-------+--------+        +---------------+        +------------------+
+              | /job-track     |        | /job-triage   |        | /job-patterns    |
+              | (status table) |        | (Outlook +    |        | (diagnostics)    |
+              |                |        |  reply detect)|        |                  |
+              +----------------+        +---------------+        +------------------+
+                                                                          |
+                                                                          v
+                                                                +---------+--------+
+                                                                | /job-dashboard   |
+                                                                | (5-tab TUI:      |
+                                                                |  Apps · Outreach |
+                                                                |  · Follow-ups    |
+                                                                |  · Pipeline      |
+                                                                |  · Reports)      |
+                                                                +------------------+
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full technical breakdown.
@@ -261,7 +276,7 @@ See [docs/SETUP.md](docs/SETUP.md) for a detailed walkthrough.
 
 ## Claude Code Skills
 
-This toolkit ships with **9 bundled skills** — one orchestrator (`/job-coach`) plus 8 verbs. It also pairs well with 27+ community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with **13 bundled skills** — one orchestrator (`/job-coach`) plus 12 verbs (8 core verbs + 4 v1.2 career-ops parity skills: `/job-evaluate`, `/job-cv`, `/job-interview`, `/job-patterns`). It also pairs well with 27+ community-built skills for resume tailoring, interview prep, and more.
 
 ### The orchestrator
 
@@ -271,21 +286,42 @@ This toolkit ships with **9 bundled skills** — one orchestrator (`/job-coach`)
 
 ### The verbs (chained by /job-coach or invoked directly)
 
+**Setup + apply + track**
+
 | Skill | What it does |
 |-------|--------------|
 | `/job-setup` | Conversational onboarding. Auto-reads your files (CLAUDE.md, `~/.brain`, memory, `~/.msmtprc`), scans for resume PDFs, only asks for gaps. Writes every config file and registers all the skills. |
 | `/job-apply <url>` | Apply to a job by URL. Auto-routes to the right ATS filler (LinkedIn / Greenhouse / Lever / Jobvite / Ashby). Dry-run by default; pass `--submit` to actually submit. |
 | `/job-track [sync]` | Show your local tracker grouped by status. Pass `sync` to push new rows to Google Sheets. |
-| `/job-triage [query]` | Search Outlook Web, classify results (rejection / interview / confirmation / …), step through extract/mark-read. |
+| `/job-triage [query]` | Search Outlook Web, classify results (rejection / interview / confirmation / …), step through extract/mark-read. Cross-references `outreach-log.csv` to auto-detect replies. |
 | `/job-status <updates.json>` | Batch-update statuses in both the Google Sheet and local CSV. Diffs before applying. |
+
+**Cold outreach**
+
+| Skill | What it does |
+|-------|--------------|
 | `/job-outreach <target>` | Research a company or hiring manager, draft a personalized cold email in chat, approve, and send via your local msmtp. Logs to `outreach-log.csv`. The agent itself is the LLM — no external API. |
-| `/job-followup [send]` | Walk the day-7 follow-ups. Reads `outreach-log.csv`, computes urgency (max 2 follow-ups per contact per career-ops cadence), drafts and sends one at a time. |
-| `/job-dashboard [live]` | ANSI-colored terminal dashboard — applications + outreach + follow-ups in one view. Snapshot in chat by default; `live` gives you the command for the interactive TUI (tabs, arrow-key nav, live reload) in a separate terminal tab. Zero deps. |
+| `/job-followup [send]` | Walk the day-7 follow-ups. Reads `outreach-log.csv`, computes urgency (max 2 follow-ups per contact per career-ops cadence), threads via `In-Reply-To`, drafts and sends one at a time. |
+
+**Deep-dive + analysis (v1.2 career-ops parity)**
+
+| Skill | What it does |
+|-------|--------------|
+| `/job-evaluate <url>` | Auto-pipeline: fetch JD → score across the 7-block A-G rubric (Role / CV / Level / Comp / Personalization / Interview / Legitimacy) → write report to `reports/` → chain into `/job-cv` → append tracker row at status `evaluated`. The killer demo. |
+| `/job-cv <jd>` | Tailor base CV for one specific JD (rewrite bullets, never invent), render ATS-friendly PDF via headless Chromium. Output to `output/cv-<company>-<date>.pdf`. |
+| `/job-interview <company>` | Prep for an upcoming interview: company snapshot + 10-15 likely questions + 5-8 STAR stories (drawn from your real projects) + 5 smart questions to ask + 3 red flags. Written to `interview-prep/`. |
+| `/job-patterns` | Diagnostic: read tracker + outreach log, surface rejection patterns (by ATS / time-to-rej / geography / role-type / day-of-week) + 3 actionable takeaways. |
+
+**Terminal dashboard**
+
+| Skill | What it does |
+|-------|--------------|
+| `/job-dashboard [live]` | ANSI-colored terminal dashboard — 5 tabs: Applications / Outreach / Follow-ups / Pipeline / Reports. Snapshot in chat by default; `live` gives you the command for the interactive TUI (tabs, arrow-key nav, fs.watch live reload) in a separate terminal tab. Zero deps. |
 
 Run `/job-setup` and the skills register themselves. Or install manually:
 
 ```bash
-bash skills/install.sh   # one-time — symlinks the 9 skills into ~/.claude/skills/
+bash skills/install.sh   # one-time — symlinks the 13 skills into ~/.claude/skills/
 ```
 
 Each skill is just a markdown file at `skills/<name>/SKILL.md` — open one to see exactly what the agent is told to do. The skills render results as markdown tables so you can see what happened at a glance.
@@ -328,7 +364,9 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- linkedin-config.template.json  # linkedin config template
 |   +-- example-config.json            # filled example
 |-- bin/
-|   +-- job-agent.sh                   # `npm run agent` — unified Claude + TUI launcher (tmux)
+|   |-- job-agent.sh                   # `npm run agent` — unified Claude + TUI launcher (tmux)
+|   |-- smoke-test.sh                  # `npm run smoke` — fresh-install smoke test (sandboxed)
+|   +-- doctor.sh                      # `npm run doctor` — health check on real environment
 |-- scripts/
 |   |-- linkedin-easy-apply.js         # LinkedIn Easy Apply automation
 |   |-- lever-apply.js                 # Lever ATS automation
@@ -337,21 +375,27 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- ashby-apply.js                 # Ashby ATS automation
 |   |-- outlook-triage.js              # Outlook inbox search and triage
 |   |-- outlook-send.js                # Outlook email composer (CDP)
-|   |-- send-cold-email.js             # Cold-email sender (msmtp)
-|   |-- job-dashboard.mjs              # Terminal TUI + snapshot dashboard
+|   |-- send-cold-email.js             # Cold-email sender (msmtp + threaded follow-ups)
+|   |-- job-dashboard.mjs              # Terminal TUI + snapshot dashboard (5 tabs)
+|   |-- generate-tailored-cv.mjs       # /job-cv: markdown -> PDF via headless Chromium
+|   |-- mirror-tracker.mjs             # CSV -> markdown mirror (data/applications.md, data/outreach.md)
 |   |-- google-sheet-sync.py           # Google Sheets tracker sync
 |   +-- tracker-status-update.py       # Batch status updater
 |-- skills/
 |   |-- install.sh                     # register bundled skills into ~/.claude/skills/
 |   |-- job-coach/SKILL.md             # /job-coach — persona + orchestrator (entry point)
 |   |-- job-setup/SKILL.md             # /job-setup — in-chat onboarding
+|   |-- job-evaluate/SKILL.md          # /job-evaluate — JD score + report + chained CV
 |   |-- job-apply/SKILL.md             # /job-apply — auto-routes ATS filler
 |   |-- job-track/SKILL.md             # /job-track — tracker + sheet sync
-|   |-- job-triage/SKILL.md            # /job-triage — Outlook search + classify
+|   |-- job-triage/SKILL.md            # /job-triage — Outlook search + classify + reply detect
 |   |-- job-status/SKILL.md            # /job-status — batch status updates
 |   |-- job-outreach/SKILL.md          # /job-outreach — cold email via msmtp
-|   |-- job-followup/SKILL.md          # /job-followup — day-7 cadence
-|   |-- job-dashboard/SKILL.md         # /job-dashboard — TUI + snapshot
+|   |-- job-followup/SKILL.md          # /job-followup — day-7 threaded cadence
+|   |-- job-dashboard/SKILL.md         # /job-dashboard — 5-tab TUI + snapshot
+|   |-- job-cv/SKILL.md                # /job-cv — tailored-CV PDF generator
+|   |-- job-interview/SKILL.md         # /job-interview — STAR prep doc
+|   |-- job-patterns/SKILL.md          # /job-patterns — pipeline diagnostics
 |   +-- README.md                      # bundled + community skills guide
 |-- templates/
 |   |-- daily-log.template.md          # Daily submission log template
@@ -359,6 +403,10 @@ When a new Claude Code session starts, the agent reads this file and picks up ex
 |   |-- outreach-log.template.csv      # Cold-email log headers
 |   |-- search-plan.template.md        # /job-coach working brief
 |   +-- interview-prep.template.md     # Interview prep template
+|-- data/                              # gitignored — markdown mirror of CSVs (npm run mirror)
+|-- reports/                           # gitignored — /job-evaluate output
+|-- output/                            # gitignored — /job-cv tailored PDFs
+|-- interview-prep/                    # gitignored — /job-interview prep notes
 +-- docs/
     |-- SETUP.md                       # Detailed setup guide
     |-- CUSTOMIZATION.md               # Country, role, platform customization

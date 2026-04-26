@@ -6,7 +6,7 @@ This is a job application automation toolkit. It automates filling and submittin
 
 Two ways to drive it:
 
-1. **Bundled skills (recommended)** — type `/job-apply`, `/job-track`, `/job-triage`, or `/job-status` in any Claude Code session. Each skill wraps the scripts below and renders results as a markdown table. Install once with `bash skills/install.sh`.
+1. **Bundled skills (recommended)** — type `/job-coach`, `/job-apply`, `/job-evaluate`, `/job-cv`, `/job-track`, `/job-triage`, `/job-status`, `/job-outreach`, `/job-followup`, `/job-dashboard`, `/job-interview`, `/job-patterns`, or `/job-setup` in any Claude Code session. Each skill wraps the scripts below and renders results as a markdown table. Install once with `bash skills/install.sh`.
 2. **Raw scripts** — call the Node.js / Python scripts in `scripts/` directly from your terminal (documented below).
 
 ## Bundled Skills
@@ -31,9 +31,9 @@ Installed by `bash skills/install.sh` (symlinks them into `~/.claude/skills/`). 
 
 **First-run flow (gstack-style):** open Claude Code anywhere and paste this one message:
 
-> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md telling you to treat me like a career-coaching client — open-ended job-search talk → `/job-coach` (intake + research + slate), job URL → `/job-apply`, reaching out to a person → `/job-outreach`, follow-ups → `/job-followup`, "how am I doing" → `/job-dashboard`, tracker → `/job-track`, status updates → `/job-status`, Outlook → `/job-triage`, first-time setup → `/job-setup`. Never answer job-search questions conversationally — always dispatch. Tell me when done, then run /job-setup and chain into /job-coach intake.
+> Install ai-job-agent: run `git clone --single-branch --depth 1 https://github.com/AkbarDevop/ai-job-agent ~/.claude/skills/ai-job-agent && cd ~/.claude/skills/ai-job-agent && bash skills/install.sh` then add an "ai-job-agent" section to my CLAUDE.md telling you to treat me like a career-coaching client — open-ended job-search talk → `/job-coach` (intake + research + slate), job URL alone → `/job-apply`, "evaluate this URL" → `/job-evaluate` (rubric + report + tailored CV), "tailor my CV" → `/job-cv`, "prep me for X interview" → `/job-interview`, "what's working / why am I getting rejected" → `/job-patterns`, reaching out to a person → `/job-outreach`, follow-ups → `/job-followup`, "how am I doing" → `/job-dashboard`, tracker → `/job-track`, status updates → `/job-status`, Outlook → `/job-triage`, first-time setup → `/job-setup`. Never answer job-search questions conversationally — always dispatch. Tell me when done, then run /job-setup and chain into /job-coach intake.
 
-Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 9 skills as symlinks under `~/.claude/skills/`, writes the coach-first routing block into CLAUDE.md, runs `/job-setup` (identity + resume + optional msmtp), and chains into `/job-coach intake` (target roles + companies + timeline → live market research → ranked slate of next moves). **After that, the user talks naturally** — "I want to apply to this url", "email the VP at X", "who should I follow up with", "how am I doing" — and Claude dispatches to the right skill. No `cd` required ever; skills work from any directory in any session. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users.
+Claude clones into `~/.claude/skills/ai-job-agent/`, registers all 13 skills as symlinks under `~/.claude/skills/`, writes the coach-first routing block into CLAUDE.md, runs `/job-setup` (identity + resume + optional msmtp), and chains into `/job-coach intake` (target roles + companies + timeline → live market research → ranked slate of next moves). **After that, the user talks naturally** — "I want to apply to this url", "email the VP at X", "evaluate this posting", "tailor my CV for this JD", "prep me for my interview at Y", "what's working" → diagnostics, "how am I doing" — and Claude dispatches to the right skill. No `cd` required ever; skills work from any directory in any session. `bash wizard.sh` and `bash setup.sh` still exist for non-Claude-Code users.
 
 Skills find this repo via `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agent/REPO_PATH` → `~/ai-job-agent`. Set the env var or rerun `install.sh` from a non-default clone location.
 
@@ -42,6 +42,33 @@ Skills find this repo via `$AI_JOB_AGENT_ROOT` → `~/.claude/skills/ai-job-agen
 Daily driver. Opens Claude Code chat (top pane) + live TUI dashboard (bottom pane) in one terminal window via tmux. They auto-sync via fs.watch — anything Claude does in chat that touches `application-tracker.csv` or `outreach-log.csv` re-renders the dashboard within ~200ms.
 
 Launcher: `bin/job-agent.sh`. If `tmux` isn't installed it offers to `brew install tmux` (macOS) or `apt install tmux` (Linux) with a one-key confirmation. On decline, falls back to opening two Terminal/iTerm tabs (macOS) or printing manual instructions (Linux).
+
+## NPM scripts
+
+| Command | Purpose |
+|---------|---------|
+| `npm run agent` | Unified mode — Claude Code + live TUI dashboard, split-pane via tmux |
+| `npm run dashboard` | Interactive 5-tab TUI dashboard (Applications · Outreach · Follow-ups · Pipeline · Reports) |
+| `npm run dashboard:snapshot` | One-shot ANSI snapshot to stdout (used by /job-dashboard skill) |
+| `npm run mirror` | Generate `data/applications.md` + `data/outreach.md` from CSVs (markdown twin) |
+| `npm run mirror:watch` | Same, but rerun on every CSV change via fs.watch |
+| `npm run smoke` | Fresh-install smoke test in a sandboxed `$HOME` (CI-safe) |
+| `npm run doctor` | Health check on the real environment (toolchain, configs, msmtp, gcloud, skill files) |
+| `npm run linkedin` / `greenhouse` / `lever` / `jobvite` / `ashby` | Direct ATS form-fillers (legacy CLI surface, wrapped by /job-apply) |
+| `npm run triage` / `send` | Outlook search + send via CDP (legacy CLI surface, wrapped by /job-triage) |
+
+## Output locations (all gitignored)
+
+| Path | Owner | Contents |
+|------|-------|----------|
+| `application-tracker.csv` | source of truth | every applied / evaluated / interview / offer / rejected row |
+| `outreach-log.csv` | source of truth | every cold email sent + replies + follow-up cadence |
+| `data/applications.md` | `npm run mirror` | markdown twin of `application-tracker.csv` |
+| `data/outreach.md` | `npm run mirror` | markdown twin of `outreach-log.csv` |
+| `reports/<date>-<co>-<role>.md` | `/job-evaluate` | per-JD rubric report (A-G blocks + sources + recommended move) |
+| `output/cv-<co>-<date>.pdf` | `/job-cv` | tailored ATS-friendly PDF resume |
+| `interview-prep/<date>-<co>-<role>.md` | `/job-interview` | STAR prep doc + smart Qs + red flags |
+| `config/search-plan.md` | `/job-coach` | the live job-search plan (intake outputs, target tiers, log) |
 
 ## Configuration
 
@@ -54,7 +81,9 @@ All personal details are in the `config/` directory:
 
 ## Workflow
 
-The standard job application workflow is: **Search -> Apply -> Track -> Triage**
+**Recommended (skill-driven):** `/job-coach` (intake + slate) → for each row: `/job-evaluate <url>` (deep-dive + rubric) → if fit ≥ 4.0, automatically chains into `/job-cv` (tailored PDF) and offers `/job-apply` → after applying, run `/job-followup` weekly → `/job-triage` to log replies → `/job-status` to flip rows → `/job-patterns` once a month for diagnostics → `/job-interview` whenever an interview shows up.
+
+**Legacy (raw scripts):** Search → Apply → Track → Triage.
 
 ### 1. Search for jobs
 
@@ -139,7 +168,9 @@ python3 scripts/tracker-status-update.py updates.json
 | `scripts/outlook-triage.js` | Email search/read/mark | Command + query/index |
 | `scripts/outlook-send.js` | Send email (Outlook Web via CDP) | To + subject + body file |
 | `scripts/send-cold-email.js` | Send cold email (Gmail via msmtp) | JSON payload on stdin or path |
-| `scripts/job-dashboard.mjs` | Terminal dashboard (TUI + snapshot) | Reads CSVs; `--snapshot` for one-shot |
+| `scripts/job-dashboard.mjs` | Terminal dashboard (5-tab TUI + snapshot) | Reads CSVs; `--snapshot` for one-shot |
+| `scripts/generate-tailored-cv.mjs` | Render approved markdown CV → ATS-friendly PDF (headless Chromium) | JSON payload on stdin (cv, outputPath, title, format) |
+| `scripts/mirror-tracker.mjs` | CSV → markdown mirror (`data/applications.md`, `data/outreach.md`) | Reads CSVs; `--watch` for fs.watch live mirror |
 | `scripts/google-sheet-sync.py` | Append to Google Sheet | CSV file path |
 | `scripts/tracker-status-update.py` | Batch status update | JSON file path |
 
@@ -191,7 +222,7 @@ This repo pairs well with [gstack](https://github.com/garrytan/gstack) — a gen
 - **Dev-experience:** `/devex-review` after shipping a new skill — it actually runs the install + first-skill-invocation and scores the onboarding. `/plan-devex-review` before adding new skills.
 - **Post-ship:** `/document-release` to sync `README.md` / `CLAUDE.md` / `skills/README.md` after a skill lands. `/retro` for the weekly "what did we ship" log.
 
-If gstack isn't installed, those skills are optional — this repo's 13 bundled skills (`/job-coach`, `/job-setup`, `/job-apply`, `/job-track`, `/job-triage`, `/job-status`, `/job-outreach`, `/job-followup`, `/job-dashboard`) work standalone.
+If gstack isn't installed, those skills are optional — this repo's 13 bundled skills (`/job-coach`, `/job-setup`, `/job-evaluate`, `/job-apply`, `/job-track`, `/job-triage`, `/job-status`, `/job-outreach`, `/job-followup`, `/job-dashboard`, `/job-cv`, `/job-interview`, `/job-patterns`) work standalone.
 
 ## File Locations
 

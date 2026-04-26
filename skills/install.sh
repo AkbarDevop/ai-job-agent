@@ -32,14 +32,15 @@ if [ "$REPO_ROOT" = "$MARKER_DIR" ]; then
   REPO_IS_MARKER=1
 fi
 
-BUNDLED=(job-coach job-setup job-evaluate job-apply job-track job-triage job-status job-outreach job-followup job-dashboard job-cv job-interview job-patterns)
+BUNDLED=(job-coach job-setup job-evaluate job-apply job-track job-triage job-status job-outreach job-followup job-dashboard job-cv job-interview job-patterns job-recap)
 
 uninstall() {
   for name in "${BUNDLED[@]}"; do
     local link="${TARGET_ROOT}/${name}"
     if [ -L "$link" ]; then
-      # only remove if it's our symlink, not a user-authored skill
-      if readlink "$link" | grep -q "${SKILLS_DIR}/${name}$"; then
+      # Direct equality check — `grep -q` would mis-match if SKILLS_DIR
+      # contains regex meta-characters (e.g. + in a path segment).
+      if [ "$(readlink "$link")" = "${SKILLS_DIR}/${name}" ]; then
         rm "$link"
         echo "removed: $link"
       else

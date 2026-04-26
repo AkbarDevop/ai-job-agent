@@ -164,21 +164,35 @@ def main() -> None:
     updates = json.loads(Path(args.json_path).read_text())
     sheet_rows = fetch_rows()
     targeted = []
+    skipped_out_of_range = []
     for update in updates:
-        if "sheet_row" in update:
-            row = sheet_rows[update["sheet_row"] - 2]
-            existing_note = row[8] if len(row) > 8 else ""
-            targeted.append(
-                {
-                    "sheet_row": update["sheet_row"],
-                    "status": update["status"],
-                    "notes": append_note(existing_note, update.get("note", "")),
-                }
-            )
+        if "sheet_row" not in update:
+            continue
+        # Validate sheet_row before any network mutation. fetch_rows() returns
+        # data starting at row 2 of the sheet, so sheet_row=2 maps to index 0.
+        idx = update["sheet_row"] - 2
+        if idx < 0 or idx >= len(sheet_rows):
+            skipped_out_of_range.append(update["sheet_row"])
+            continue
+        row = sheet_rows[idx]
+        existing_note = row[8] if len(row) > 8 else ""
+        targeted.append(
+            {
+                "sheet_row": update["sheet_row"],
+                "status": update["status"],
+                "notes": append_note(existing_note, update.get("note", "")),
+            }
+        )
     if targeted:
         update_sheet(targeted)
     local_changed = update_local_tracker(updates)
-    print(json.dumps({"sheet_rows_updated": [row["sheet_row"] for row in targeted], "local_rows_changed": local_changed}, indent=2))
+    result = {
+        "sheet_rows_updated": [row["sheet_row"] for row in targeted],
+        "local_rows_changed": local_changed,
+    }
+    if skipped_out_of_range:
+        result["skipped_out_of_range"] = skipped_out_of_range
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

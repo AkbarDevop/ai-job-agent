@@ -102,6 +102,27 @@ Use Glob on these patterns in order; stop at the first 5 hits:
 
 For each candidate PDF, capture path + mtime. The most recently modified one is likely the live resume.
 
+**Resume content extraction (best-effort):**
+
+If you found a candidate resume PDF in the previous step, run:
+
+```bash
+node "$AI_JOB_AGENT_ROOT/scripts/parse-resume.mjs" "$PDF_PATH"
+```
+
+If it returns text (chars > 200), use the extracted text to *additionally* pre-fill:
+
+- **Education** — look for university names ("University of …", "Mizzou", a known institution), graduation year (most recent "20XX–20YY" near education lines), GPA (the number after "GPA")
+- **Major / degree type** — "Bachelor of Science in …" / "Master's" / "PhD" patterns
+- **Years of experience** — count distinct work entries; if all post-graduation, use that as YoE
+- **Key projects + skills** — pull the bulleted "Projects" section and the "Skills" line; Claude can paraphrase into `projectPitch` field of `linkedin-config.json`
+- **LinkedIn URL** — search for `linkedin.com/in/...` in the text (if not already known)
+- **GitHub URL** — search for `github.com/...`
+
+If the script returns empty text, skip silently — auto-discovery from `~/CLAUDE.md` + `~/.brain/` + memory still produces enough for most users.
+
+Don't fail Step 0.5 if Playwright isn't installed (`npx playwright install chromium`) — emit a soft "tip: install Playwright Chromium for resume auto-extract" and continue.
+
 **LinkedIn URL (from whatever source):**
 
 Search all the files you just read for `linkedin.com/in/*` URLs. The first match is almost always the user's own profile.

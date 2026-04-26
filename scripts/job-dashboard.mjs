@@ -27,6 +27,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import readline from 'node:readline';
+import { fileURLToPath } from 'node:url';
 
 const ANSI = {
   reset: '\x1b[0m',
@@ -161,7 +162,9 @@ function resolveRepoRoot() {
   for (const c of candidates) {
     if (fs.existsSync(path.join(c, 'package.json'))) return c;
   }
-  let dir = path.dirname(new URL(import.meta.url).pathname);
+  // Walk up from this script's actual location (handles spaces/unicode/Windows
+  // drive paths via fileURLToPath — `new URL().pathname` mangles them).
+  let dir = path.dirname(fileURLToPath(import.meta.url));
   for (let i = 0; i < 5; i += 1) {
     if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
     dir = path.dirname(dir);
@@ -184,6 +187,9 @@ function readMarker() {
 
 function parseCSV(text) {
   if (!text || !text.trim()) return [];
+  // Strip UTF-8 BOM — Excel and some Google Sheets exports include it,
+  // and otherwise the first header field becomes "﻿date" and never matches.
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
   const rows = [];
   let row = [];
   let field = '';
@@ -875,16 +881,153 @@ function renderReportDetail(report, height) {
   lines.push('');
   lines.push(color(ANSI.dim, '─── Body ───'));
   lines.push('');
-  // Show first ~25 lines of the body, indented
-  const bodyLines = (report.body || '').split('\n').slice(0, height - 12);
-  for (const line of bodyLines) {
-    lines.push('  ' + truncate(line, 56));
-  }
-  if ((report.body || '').split('\n').length > bodyLines.length) {
+  // Render the body with the ANSI markdown renderer, capped at the available height
+  const rendered = renderMarkdown(report.body || '', 56);
+  const bodyLines = rendered.split('\n').slice(0, height - 12);
+  for (const line of bodyLines) lines.push(line);
+  if (rendered.split('\n').length > bodyLines.length) {
     lines.push('');
     lines.push(color(ANSI.dim, `  …open ${report.relPath} for the full report`));
   }
   return lines.join('\n');
+}
+
+// --------------------------------------------------------------------------
+// Plan view (6th tab) — surfaces config/search-plan.md (the /job-coach plan)
+// --------------------------------------------------------------------------
+
+function viewPlan(applications, outreach, opts = {}) {
+  const { root } = opts;
+  const planPath = root ? path.join(root, 'config', 'search-plan.md') : null;
+  if (!planPath || !fs.existsSync(planPath)) {
+    return {
+      output: [
+        color(ANSI.bold + ANSI.cyan, 'Search plan'),
+        '',
+        color(ANSI.dim, '  (no plan yet — run `/job-coach intake` to build one)'),
+      ].join('\n'),
+      visibleRows: [],
+      totalRows: 0,
+    };
+  }
+
+  const text = fs.readFileSync(planPath, 'utf8');
+  const ageDays = Math.floor((Date.now() - fs.statSync(planPath).mtimeMs) / 86_400_000);
+  const ageBucket = ageDays > 14 ? color(ANSI.red, `${ageDays}d old — stale, run /job-coach refresh`)
+    : ageDays > 7 ? color(ANSI.yellow, `${ageDays}d old — getting stale`)
+    : color(ANSI.green, `${ageDays}d old — fresh`);
+
+  return {
+    output: [
+      renderTable({
+        title: 'Search plan — meta',
+        columns: [{ label: 'Field', max: 20 }, { label: 'Value', max: 80 }],
+        rows: [
+          ['Path', planPath.replace(root + '/', '')],
+          ['Last updated', ageBucket],
+          ['Bytes', String(text.length)],
+        ],
+      }),
+      '',
+      color(ANSI.bold + ANSI.cyan, 'Plan body (markdown)'),
+      '',
+      renderMarkdown(text, 80),
+    ].join('\n'),
+    visibleRows: [],
+    totalRows: 0,
+  };
+}
+
+// --------------------------------------------------------------------------
+// Markdown → ANSI renderer (small, just enough for our reports + plans)
+// --------------------------------------------------------------------------
+
+function renderMarkdown(text, maxWidth = 80) {
+  const out = [];
+  const lines = text.split('\n');
+  let inCode = false;
+  let inFrontmatter = false;
+  for (let i = 0; i < lines.length; i += 1) {
+    let line = lines[i];
+
+    // Skip YAML frontmatter
+    if (i === 0 && line.startsWith('---')) { inFrontmatter = true; continue; }
+    if (inFrontmatter) {
+      if (line.startsWith('---')) inFrontmatter = false;
+      continue;
+    }
+
+    // Code fences
+    if (line.startsWith('```')) {
+      inCode = !inCode;
+      out.push(color(ANSI.dim, '  ' + line));
+      continue;
+    }
+    if (inCode) {
+      out.push('  ' + color(ANSI.dim, line));
+      continue;
+    }
+
+    // Headings
+    if (line.startsWith('### ')) {
+      out.push('  ' + color(ANSI.bold + ANSI.cyan, line.slice(4)));
+      continue;
+    }
+    if (line.startsWith('## ')) {
+      out.push('  ' + color(ANSI.bold + ANSI.cyan, line.slice(3)));
+      continue;
+    }
+    if (line.startsWith('# ')) {
+      out.push('  ' + color(ANSI.bold + ANSI.blue, line.slice(2)));
+      continue;
+    }
+
+    // Block quote
+    if (line.startsWith('> ')) {
+      out.push('  ' + color(ANSI.dim, '┃ ') + color(ANSI.dim, applyInline(line.slice(2))));
+      continue;
+    }
+
+    // Bullet
+    if (/^\s*[-*]\s/.test(line)) {
+      const indent = (line.match(/^\s*/) || [''])[0];
+      const body = line.replace(/^\s*[-*]\s/, '');
+      out.push('  ' + indent + color(ANSI.cyan, '•') + ' ' + applyInline(body));
+      continue;
+    }
+
+    // Numbered list
+    if (/^\s*\d+\.\s/.test(line)) {
+      const m = line.match(/^(\s*)(\d+)\.\s(.*)$/);
+      if (m) {
+        out.push('  ' + m[1] + color(ANSI.cyan, m[2] + '.') + ' ' + applyInline(m[3]));
+        continue;
+      }
+    }
+
+    // hr
+    if (line.match(/^---+\s*$/)) {
+      out.push('  ' + color(ANSI.dim, '─'.repeat(Math.min(60, maxWidth))));
+      continue;
+    }
+
+    // Paragraph (apply inline + indent)
+    if (line.trim()) {
+      out.push('  ' + applyInline(line));
+    } else {
+      out.push('');
+    }
+  }
+  return out.join('\n');
+}
+
+function applyInline(text) {
+  // Order matters — code first so its content isn't bold/italic'd
+  return text
+    .replace(/`([^`\n]+)`/g, (_, m) => color(ANSI.bg.black + ANSI.cyan, ' ' + m + ' '))
+    .replace(/\*\*([^*\n]+)\*\*/g, (_, m) => color(ANSI.bold, m))
+    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, (_, lead, m) => lead + color(ANSI.dim, m))
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => color(ANSI.blue + ANSI.bold, label) + color(ANSI.dim, ` (${url})`));
 }
 
 // --------------------------------------------------------------------------
@@ -947,7 +1090,7 @@ function renderHelpOverlay(termRows, termCols) {
     ['Navigation'],
     ['  tab / →     ', 'next tab'],
     ['  ←           ', 'previous tab'],
-    ['  1 2 3 4 5  ', 'jump to tab (Apps · Outreach · Follow-ups · Pipeline · Reports)'],
+    ['  1-6        ', 'jump to tab (Apps · Outreach · Follow-ups · Pipeline · Reports · Plan)'],
     ['  ↑ ↓ j k    ', 'scroll rows up / down'],
     [''],
     ['Filtering'],
@@ -1009,6 +1152,8 @@ function printSnapshot(data) {
   process.stdout.write(viewPipeline(applications, outreach).output + '\n\n');
   const reportsView = viewReports(applications, outreach, { root });
   process.stdout.write(reportsView.output + '\n\n');
+  const planView = viewPlan(applications, outreach, { root });
+  process.stdout.write(planView.output + '\n\n');
   process.stdout.write(
     color(ANSI.dim, '  For live interactive view: run `npm run dashboard` in a terminal tab. Press ? once running for keybinds.\n'),
   );
@@ -1024,6 +1169,7 @@ const TABS = [
   { key: 'followups', label: 'Follow-ups', render: viewFollowups, source: 'outreach' },
   { key: 'pipeline', label: 'Pipeline', render: viewPipeline, source: 'pipeline' },
   { key: 'reports', label: 'Reports', render: viewReports, source: 'reports' },
+  { key: 'plan', label: 'Plan', render: viewPlan, source: 'plan' },
 ];
 
 function runInteractive(initialData, root) {
@@ -1139,6 +1285,8 @@ function runInteractive(initialData, root) {
         scroll: state.scroll,
         root,
       });
+    } else if (current.key === 'plan') {
+      viewResult = viewPlan(state.applications, state.outreach, { root });
     } else {
       const data = state[current.source];
       if (data && data.error) {
@@ -1302,7 +1450,7 @@ function runInteractive(initialData, root) {
       state.scroll = 0;
       state.cursor = 0;
       state.filterQuery = '';
-    } else if (ch === '1' || ch === '2' || ch === '3' || ch === '4' || ch === '5') {
+    } else if (ch === '1' || ch === '2' || ch === '3' || ch === '4' || ch === '5' || ch === '6') {
       state.tab = Math.min(TABS.length - 1, Number(ch) - 1);
       state.scroll = 0;
       state.cursor = 0;

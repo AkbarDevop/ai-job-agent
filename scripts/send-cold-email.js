@@ -99,6 +99,10 @@ function normalizeMsgId(id) {
   if (!trimmed) return null;
   // Strip whitespace inside — RFC 5322 message-ids must not contain it.
   const compact = trimmed.replace(/\s+/g, '');
+  // Reject ids that don't look like message-ids — receivers ignore them
+  // for threading. Better to skip silently than send a broken In-Reply-To.
+  const inner = compact.replace(/^<|>$/g, '');
+  if (!inner.includes('@')) return null;
   if (compact.startsWith('<') && compact.endsWith('>')) return compact;
   return `<${compact}>`;
 }

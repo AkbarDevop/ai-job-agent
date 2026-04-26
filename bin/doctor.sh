@@ -175,8 +175,8 @@ else
     "Run \`bash skills/install.sh\` from the repo to write the REPO_PATH marker, or set \$AI_JOB_AGENT_ROOT"
 fi
 
-# Symlinks for all 9 bundled skills
-SKILL_NAMES=(job-coach job-setup job-apply job-track job-triage job-status job-outreach job-followup job-dashboard)
+# Symlinks for all 13 bundled skills
+SKILL_NAMES=(job-coach job-setup job-evaluate job-apply job-track job-triage job-status job-outreach job-followup job-dashboard job-cv job-interview job-patterns job-recap)
 MISSING_SKILLS=()
 for s in "${SKILL_NAMES[@]}"; do
   if [ ! -L "$HOME/.claude/skills/$s" ] && [ ! -d "$HOME/.claude/skills/$s" ]; then
@@ -184,9 +184,9 @@ for s in "${SKILL_NAMES[@]}"; do
   fi
 done
 if [ ${#MISSING_SKILLS[@]} -eq 0 ]; then
-  ok "all 9 skills registered in ~/.claude/skills/"
+  ok "all 14 skills registered in ~/.claude/skills/"
 else
-  fail "all 9 skills registered in ~/.claude/skills/" "missing: ${MISSING_SKILLS[*]}" \
+  fail "all 14 skills registered in ~/.claude/skills/" "missing: ${MISSING_SKILLS[*]}" \
     "Run \`bash $REPO/skills/install.sh\` to (re)create the symlinks"
 fi
 
@@ -205,7 +205,8 @@ echo -e "${BOLD}3. Personal config${NC}"
 
 LINKEDIN_CONFIG="$REPO/config/linkedin-config.json"
 if [ -f "$LINKEDIN_CONFIG" ]; then
-  if node -e "JSON.parse(require('fs').readFileSync('$LINKEDIN_CONFIG','utf8'))" >/dev/null 2>&1; then
+  # Pass path via env to avoid quote-injection on weird repo paths
+  if AJA_CFG="$LINKEDIN_CONFIG" node -e "JSON.parse(require('fs').readFileSync(process.env.AJA_CFG,'utf8'))" >/dev/null 2>&1; then
     ok "config/linkedin-config.json exists & is valid JSON"
 
     # Fields where the placeholder = a real fail (required to use the agent at all).
@@ -215,9 +216,10 @@ if [ -f "$LINKEDIN_CONFIG" ]; then
 
     MISSING_REQUIRED=()
     for f in "${REQUIRED[@]}"; do
-      val=$(node -e "
-        const c = JSON.parse(require('fs').readFileSync('$LINKEDIN_CONFIG','utf8'));
-        process.stdout.write(c['$f'] == null ? '' : String(c['$f']));
+      val=$(AJA_CFG="$LINKEDIN_CONFIG" AJA_FIELD="$f" node -e "
+        const c = JSON.parse(require('fs').readFileSync(process.env.AJA_CFG,'utf8'));
+        const k = process.env.AJA_FIELD;
+        process.stdout.write(c[k] == null ? '' : String(c[k]));
       " 2>/dev/null)
       if [ -z "$val" ] || [[ "$val" == YOUR_* ]] || [[ "$val" == /path/to/* ]]; then
         MISSING_REQUIRED+=("$f")
@@ -226,9 +228,10 @@ if [ -f "$LINKEDIN_CONFIG" ]; then
 
     MISSING_OPTIONAL=()
     for f in "${OPTIONAL[@]}"; do
-      val=$(node -e "
-        const c = JSON.parse(require('fs').readFileSync('$LINKEDIN_CONFIG','utf8'));
-        process.stdout.write(c['$f'] == null ? '' : String(c['$f']));
+      val=$(AJA_CFG="$LINKEDIN_CONFIG" AJA_FIELD="$f" node -e "
+        const c = JSON.parse(require('fs').readFileSync(process.env.AJA_CFG,'utf8'));
+        const k = process.env.AJA_FIELD;
+        process.stdout.write(c[k] == null ? '' : String(c[k]));
       " 2>/dev/null)
       if [ -z "$val" ] || [[ "$val" == YOUR_* ]]; then
         MISSING_OPTIONAL+=("$f")
@@ -251,8 +254,8 @@ if [ -f "$LINKEDIN_CONFIG" ]; then
     fi
 
     # Resume PDF actually on disk?
-    RESUME_PATH=$(node -e "
-      const c = JSON.parse(require('fs').readFileSync('$LINKEDIN_CONFIG','utf8'));
+    RESUME_PATH=$(AJA_CFG="$LINKEDIN_CONFIG" node -e "
+      const c = JSON.parse(require('fs').readFileSync(process.env.AJA_CFG,'utf8'));
       process.stdout.write(c.resumePath || '');
     " 2>/dev/null)
     if [ -z "$RESUME_PATH" ] || [[ "$RESUME_PATH" == /path/to/* ]]; then

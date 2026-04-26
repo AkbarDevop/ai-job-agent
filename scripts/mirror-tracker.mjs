@@ -17,6 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 // --------------------------------------------------------------------------
 // Path resolution (same priority order as job-dashboard.mjs)
@@ -32,7 +33,7 @@ function resolveRepoRoot() {
   for (const c of candidates) {
     if (fs.existsSync(path.join(c, 'package.json'))) return c;
   }
-  let dir = path.dirname(new URL(import.meta.url).pathname);
+  let dir = path.dirname(fileURLToPath(import.meta.url));
   for (let i = 0; i < 5; i += 1) {
     if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
     dir = path.dirname(dir);
@@ -51,6 +52,7 @@ function readMarker() {
 
 function parseCSV(text) {
   if (!text || !text.trim()) return [];
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);  // strip UTF-8 BOM
   const rows = [];
   let row = [];
   let field = '';

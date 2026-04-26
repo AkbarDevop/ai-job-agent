@@ -1,6 +1,6 @@
 # Claude Code Skills for Job Hunting
 
-This toolkit ships with 13 bundled skills — a persona-driven orchestrator (`/job-coach`) plus 8 verbs that do the actual work. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
+This toolkit ships with 13 bundled skills — a persona-driven orchestrator (`/job-coach`) plus 12 verbs (8 core verbs for setup / apply / track / outreach / dashboard, plus 4 v1.2 career-ops parity skills: `/job-evaluate`, `/job-cv`, `/job-interview`, `/job-patterns`) that do the actual work. It also pairs well with a long list of community-built skills for resume tailoring, interview prep, and more.
 
 ---
 

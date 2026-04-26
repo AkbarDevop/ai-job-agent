@@ -71,10 +71,10 @@ echo -e "${BOLD}1. Install flow${NC}"
 run "install.sh runs cleanly in sandboxed HOME" \
   bash -c "HOME='$SANDBOX' bash '$REPO/skills/install.sh'"
 
-run "all 13 skills symlinked" \
+run "all 14 skills symlinked" \
   bash -c "
     count=\$(find '$SANDBOX/.claude/skills/' -maxdepth 1 -type l -name 'job-*' 2>/dev/null | wc -l | tr -d ' ')
-    [ \"\$count\" -eq 13 ]
+    [ \"\$count\" -eq 14 ]
   "
 
 run "REPO_PATH marker file written (legacy non-canonical clone)" \
@@ -188,12 +188,12 @@ echo ""
 
 echo -e "${BOLD}5. Skill file integrity${NC}"
 
-for skill in job-coach job-setup job-evaluate job-apply job-track job-triage job-status job-outreach job-followup job-dashboard job-cv job-interview job-patterns; do
+for skill in job-coach job-setup job-evaluate job-apply job-track job-triage job-status job-outreach job-followup job-dashboard job-cv job-interview job-patterns job-recap; do
   run "$skill/SKILL.md has YAML frontmatter" \
     bash -c "head -1 '$REPO/skills/$skill/SKILL.md' | grep -q '^---'"
 done
 
-for skill in job-coach job-setup job-evaluate job-apply job-track job-triage job-status job-outreach job-followup job-dashboard job-cv job-interview job-patterns; do
+for skill in job-coach job-setup job-evaluate job-apply job-track job-triage job-status job-outreach job-followup job-dashboard job-cv job-interview job-patterns job-recap; do
   run "$skill/SKILL.md has 'Proactively invoke' trigger phrase" \
     bash -c "grep -q 'Proactively invoke' '$REPO/skills/$skill/SKILL.md'"
 done

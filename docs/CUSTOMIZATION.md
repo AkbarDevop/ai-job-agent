@@ -2,15 +2,60 @@
 
 This toolkit is designed to be adapted to your specific situation. Here's how to customize it for different countries, roles, platforms, and workflows.
 
+The 13 bundled skills (`/job-coach`, `/job-setup`, `/job-evaluate`, `/job-apply`, `/job-track`, `/job-triage`, `/job-status`, `/job-outreach`, `/job-followup`, `/job-dashboard`, `/job-cv`, `/job-interview`, `/job-patterns`) are all just markdown files at `skills/<name>/SKILL.md`. You can fork them, edit them, or override individual skills locally — see [Customizing Skills](#customizing-skills) below.
+
 ## Table of Contents
 
+- [Customizing the Search Plan (`/job-coach`)](#customizing-the-search-plan-job-coach)
 - [Different Countries](#different-countries)
 - [Different Roles](#different-roles)
 - [Different ATS Platforms](#different-ats-platforms)
+- [Localizing `/job-outreach` for Non-English Regions](#localizing-job-outreach-for-non-english-regions)
 - [Different Email Providers](#different-email-providers)
 - [Different Job Boards](#different-job-boards)
 - [Adding New Form Patterns](#adding-new-form-patterns)
 - [Custom Tracking Workflows](#custom-tracking-workflows)
+- [Customizing Skills](#customizing-skills)
+- [Customizing the A-G Rubric (`/job-evaluate`)](#customizing-the-a-g-rubric-job-evaluate)
+- [Customizing the Tailored CV (`/job-cv`)](#customizing-the-tailored-cv-job-cv)
+
+## Customizing the Search Plan (`/job-coach`)
+
+`config/search-plan.md` is `/job-coach`'s working brief — target tiers, geography, timeline, comp floor, log of decisions. It's written by the intake interview and refreshed every time you run `/job-coach`. To override coach decisions, edit the file directly.
+
+### Adjusting target tiers
+
+Open `config/search-plan.md` and edit the company lists:
+
+```markdown
+### Tier 1 (apply to every opening)
+- Ameren
+- Evergy
+- Xcel Energy
+- ERIELL (UZ)
+
+### Tier 2 (apply if fit is strong)
+- Spire Energy
+- TotalEnergies (UZ branch)
+
+### Hard no (skip always)
+- Defense / weapons companies
+- Companies that previously rejected you twice
+```
+
+`/job-evaluate` reads this list and bumps Block A (role match) when a posting is at a Tier 1 company. `/job-patterns` Signal E groups outreach response rates by tier.
+
+### Adjusting comp floor
+
+Set `Comp floor` under "Compensation + constraints". Block D in `/job-evaluate` and `/job-coach`'s slate-scoring will use this number to score postings.
+
+### Adjusting hard nos and never-apply patterns
+
+Add to "Hard no" or "Other constraints" — coach reads these and skips matching roles in the slate.
+
+### Plan version + log
+
+The plan file has a `Log` section. Coach appends a one-liner per session ("YYYY-MM-DD: rejected from X, removed from Tier 2"). Useful as a paper trail — diff the file in git (it's gitignored, so use a private branch if you want history).
 
 ## Different Countries
 
@@ -103,17 +148,21 @@ Update the pitch text in your answer bank for each role type. These are used for
 
 ## Different ATS Platforms
 
-### Adding a New ATS
+### Adding a New ATS (Workday, iCIMS, etc.)
 
-Each ATS script follows the same pattern:
+`/job-apply` routes by URL host. To add a new ATS, you'll do two things:
+
+1. Write a new `scripts/<platform>-apply.js` script
+2. Wire it into `/job-apply`'s URL routing in `skills/job-apply/SKILL.md`
+
+**Step 1.** Use `scripts/greenhouse-apply.js` as the template — it has the cleanest single-page form pattern. Each ATS script follows:
 
 1. **Navigate** to the application page
 2. **Fill** form fields using the config
-3. **Detect** missing required fields
-4. **Submit** (if `autoSubmit: true`)
+3. **Detect** missing required fields (return list, don't crash)
+4. **Submit** (if `autoSubmit: true` and no missing fields)
 5. **Monitor** for confirmation
-
-To add a new ATS:
+6. **Exit** with one of the conventional codes: `0` ok, `1` crash, `2` blocked-on-unknown, `3` captcha-timeout
 
 ```javascript
 // scripts/new-ats-apply.js
@@ -138,6 +187,8 @@ async function fillForm(page) {
   return missing;
 }
 ```
+
+**Step 2.** Open `skills/job-apply/SKILL.md` and add the URL host pattern to the routing table near the top. Add an entry to `package.json` if you want a direct CLI shortcut (`"my-ats": "node scripts/my-ats-apply.js"`).
 
 ### Workday
 
@@ -164,6 +215,55 @@ google-chrome --remote-debugging-port=9223
 # Connect your script
 CDP_URL=http://127.0.0.1:9223 node scripts/lever-apply.js "https://..." config.json
 ```
+
+## Localizing `/job-outreach` for Non-English Regions
+
+`/job-outreach` is the cold-email skill. It does the LLM work in-chat (Claude itself drafts the email — no external LLM API), so localization is a matter of telling Claude what language and tone to use. Two paths:
+
+### Path A — Set a default in `candidate-profile.md`
+
+Add a section to your `config/candidate-profile.md`:
+
+```markdown
+## Outreach style preferences
+
+- **Default language:** English
+- **Russian/Uzbek for:** any UZ company (ERIELL, Worley UZ, Siemens Energy UZ, Masdar Astana branch, EBRD, ADB, Toshkent Davlat...). Russian first if recipient looks Russian-named; switch to Uzbek for Uzbek-named recipients in Tashkent.
+- **Tone:** warm but specific. Mention a concrete project the recipient worked on. End with a one-sentence ask.
+- **Sign-off:** my name in target language ("Akbarjon" in Uzbek/Russian, "Akbar" in English)
+- **Localization tip for UZ:** lead with university connection (Mizzou EE) — "I'm an EE student at the University of Missouri" reads more credibly than "I'm a student in Uzbekistan from a US university"
+```
+
+`/job-outreach` reads this section before drafting and adapts. The agent will narrate in chat: *"Recipient looks Uzbek-named; drafting in Uzbek. Confirm before send."*
+
+### Path B — Per-call override
+
+Just say it in chat:
+
+```
+> /job-outreach "Zulfiya Vafaeva at Worley Uzbekistan" — write it in Russian, she replied in Uzbek last time so she's bilingual but Russian is more formal for an HR director
+```
+
+`/job-outreach` will use that and log the language to the `notes` column of `outreach-log.csv` for future reference.
+
+### Multi-language follow-ups
+
+`/job-followup` reads the language from the original outreach (logged in `outreach-log.csv` `notes` if you set Path A or B). Keeps the thread consistent — won't switch from Russian to English mid-thread.
+
+### Adding a new language
+
+For languages where Claude's drafting may be weak (Uzbek, Kazakh, Turkmen, etc.), add a "Reference phrases" sub-section to `candidate-profile.md`:
+
+```markdown
+## Outreach reference phrases — Uzbek
+
+- "Hurmatli Zulfiya opa" — formal greeting to a woman senior in age
+- "Sizning kompaniyangizda IT bo'limida ish izlayman" — "I'm looking for work in your IT department"
+- "Vaqtingiz uchun rahmat" — closing thanks
+- Avoid: "salom" (too casual for a hiring manager)
+```
+
+Claude will pull from this file before drafting. Real example: when Akbar's outreach to Worley UZ landed in Uzbek, the recipient replied in Uzbek with HR contact info — proper localization is a 10x multiplier on response rate in non-English markets.
 
 ## Different Email Providers
 
@@ -310,3 +410,48 @@ curl -X POST "$SLACK_WEBHOOK_URL" \
   -H 'Content-type: application/json' \
   -d "{\"text\": \"Applied to $COMPANY - $ROLE via $PLATFORM\"}"
 ```
+
+## Customizing Skills
+
+Each of the 13 bundled skills (`/job-coach`, `/job-setup`, `/job-evaluate`, `/job-apply`, `/job-track`, `/job-triage`, `/job-status`, `/job-outreach`, `/job-followup`, `/job-dashboard`, `/job-cv`, `/job-interview`, `/job-patterns`) is just a markdown file at `skills/<name>/SKILL.md`. To customize:
+
+1. Open `skills/<skill-name>/SKILL.md`
+2. Edit the prompt — the YAML frontmatter (name, description, allowed-tools), the workflow, the tables, the rules
+3. Re-run `bash skills/install.sh` (idempotent — refreshes symlinks)
+4. Test in a fresh Claude Code session
+
+Common customizations:
+
+- **Tighten the trigger phrases:** edit the `description` field in the YAML frontmatter — the "Proactively invoke this skill when..." sentence. Add your own phrasing.
+- **Skip the approval gate** (NOT recommended — both gates exist for safety): remove the "User approves" steps from the SKILL.md workflow.
+- **Change the output format:** the SKILL.md tells Claude exactly which markdown tables to render. Reorder, rename, or expand them as you like.
+
+To add a new bundled skill, copy any `SKILL.md` as a starting template, add the directory name to the `BUNDLED` array in `skills/install.sh`, document it in `skills/README.md` and `README.md`. See `CONTRIBUTING.md` for the full procedure.
+
+## Customizing the A-G Rubric (`/job-evaluate`)
+
+`/job-evaluate` and `/job-coach` both use the 7-block A-G rubric (Role / CV / Level / Comp / Personalization / Interview / Legitimacy). To re-weight:
+
+1. Open `skills/job-coach/SKILL.md`, find the "Step 4 — Present the slate" section, edit the block table (the column descriptions and what 5/5 looks like).
+2. Open `skills/job-evaluate/SKILL.md`, find "Step 2 — Score across A-G blocks" and update the block-by-block scoring guidance.
+3. The headline fit is `total ÷ 7`. To change the threshold for "auto-chain into /job-cv" (currently 4.0/5.0), edit the rule in `skills/job-evaluate/SKILL.md` Step 5.
+
+If you want a different rubric entirely (e.g. you're not in tech and the "leetcode/Glassdoor signal" block doesn't apply), rewrite the table block-by-block — Claude will follow the new rubric as written.
+
+## Customizing the Tailored CV (`/job-cv`)
+
+The PDF is rendered by `scripts/generate-tailored-cv.mjs` via headless Chromium. The default CSS is one-column serif — ATS-tested. To change visual style:
+
+1. Open `scripts/generate-tailored-cv.mjs`. Find the `defaultCSS` constant.
+2. Edit fonts / sizes / spacing. **Don't add icons, multi-column layouts, or background colors** — ATS parsers choke on those.
+3. Test by piping a JSON payload manually:
+
+```bash
+echo '{"cv": "# Test\n## Section\n- bullet", "outputPath": "/tmp/test.pdf", "title": "Test"}' \
+  | node scripts/generate-tailored-cv.mjs
+open /tmp/test.pdf
+```
+
+To change paper size globally, set `format: 'a4'` in `skills/job-cv/SKILL.md` Step 7's payload (the skill currently defaults to `letter` and switches to `a4` for EU roles automatically).
+
+To preserve a specific section across all tailored versions (e.g. you always want a "Languages" block at the top regardless of JD), add a `## Always include` section to your `cv.md` and document it in the rules in `skills/job-cv/SKILL.md`.

@@ -1,0 +1,74 @@
+name: smoke + lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke:
+    name: smoke test (sandboxed)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run smoke test
+        run: npm run smoke
+        # Smoke test runs install.sh against a sandboxed HOME, exercises
+        # send-cold-email --dry-run, dashboard --snapshot, parse-resume
+        # missing-file path, CSV edge cases, all 14 SKILL.md files.
+
+      - name: Run dashboard snapshot (verify it doesn't crash)
+        run: node scripts/job-dashboard.mjs --snapshot >/dev/null
+
+      - name: Run mirror tracker (verify it doesn't crash on empty CSVs)
+        run: node scripts/mirror-tracker.mjs >/dev/null
+
+      - name: Verify install.sh idempotent re-run
+        run: |
+          HOME="${{ runner.temp }}/sandbox-home" mkdir -p "$HOME/.claude/skills"
+          HOME="${{ runner.temp }}/sandbox-home" bash skills/install.sh >/dev/null
+          HOME="${{ runner.temp }}/sandbox-home" bash skills/install.sh 2>&1 | grep -q "already linked"
+
+  lint:
+    name: shellcheck + bash syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bash syntax check
+        run: |
+          for f in bin/*.sh skills/install.sh setup.sh wizard.sh; do
+            echo "Checking $f"
+            bash -n "$f"
+          done
+
+      - name: ShellCheck (warn-only, doesn't fail build)
+        continue-on-error: true
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          shellcheck bin/*.sh skills/install.sh || true
+
+  skill-files:
+    name: SKILL.md frontmatter validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify every SKILL.md has YAML frontmatter + Proactively-invoke trigger
+        run: |
+          fail=0
+          for f in skills/job-*/SKILL.md; do
+            head -1 "$f" | grep -q '^---$' || { echo "MISSING frontmatter: $f"; fail=1; }
+            grep -q 'Proactively invoke' "$f" || { echo "MISSING 'Proactively invoke' phrase: $f"; fail=1; }
+          done
+          exit $fail
