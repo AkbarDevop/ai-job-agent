@@ -706,6 +706,201 @@ function viewPipeline(applications, outreach) {
 // Detail pane (shown on the right when state.detailRow is set)
 // --------------------------------------------------------------------------
 
+// --------------------------------------------------------------------------
+// Reports view (5th tab) — lists eval reports from /job-evaluate
+// --------------------------------------------------------------------------
+
+// Best-effort YAML frontmatter parser (just the simple key: value lines we
+// emit from /job-evaluate). Doesn't handle nested maps beyond fit_breakdown.
+function parseFrontmatter(text) {
+  if (!text.startsWith('---')) return { meta: {}, body: text };
+  const end = text.indexOf('\n---', 4);
+  if (end === -1) return { meta: {}, body: text };
+  const block = text.slice(4, end).trim();
+  const body = text.slice(end + 4).replace(/^\s*\n/, '');
+  const meta = {};
+  for (const line of block.split('\n')) {
+    const m = line.match(/^([a-zA-Z_][\w]*):\s*(.*)$/);
+    if (!m) continue;
+    let val = m[2].trim();
+    if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+    if (/^-?\d+(\.\d+)?$/.test(val)) val = Number(val);
+    meta[m[1]] = val;
+  }
+  return { meta, body };
+}
+
+function loadReports(root) {
+  const dir = path.join(root, 'reports');
+  if (!fs.existsSync(dir)) return [];
+  const out = [];
+  for (const name of fs.readdirSync(dir).filter((f) => f.endsWith('.md'))) {
+    const filePath = path.join(dir, name);
+    try {
+      const text = fs.readFileSync(filePath, 'utf8');
+      const { meta, body } = parseFrontmatter(text);
+      out.push({
+        path: filePath,
+        relPath: path.join('reports', name),
+        name,
+        company: meta.company || '',
+        role: meta.role || '',
+        url: meta.url || '',
+        evaluated_at: meta.evaluated_at || '',
+        fit_score: typeof meta.fit_score === 'number' ? meta.fit_score : Number(meta.fit_score) || 0,
+        status: meta.status || 'evaluated',
+        body,
+      });
+    } catch (_) { /* skip malformed */ }
+  }
+  return out.sort((a, b) => (b.evaluated_at || '').localeCompare(a.evaluated_at || ''));
+}
+
+function fitColor(score) {
+  if (score >= 4.0) return ANSI.green + ANSI.bold;
+  if (score >= 3.0) return ANSI.cyan;
+  if (score >= 2.0) return ANSI.yellow;
+  return ANSI.dim;
+}
+
+function viewReports(applications, outreach, opts = {}) {
+  // signature matches the others (applications, outreach, scroll, opts)
+  // but reports come from disk, not CSVs, so we re-resolve root inline.
+  const { filter = '', highlight = -1, narrow = false, scroll = 0, root } = opts;
+  const reports = root ? loadReports(root) : [];
+
+  if (reports.length === 0) {
+    return {
+      output: [
+        color(ANSI.bold + ANSI.cyan, 'Evaluation reports'),
+        '',
+        color(ANSI.dim, '  (no reports yet — paste a job URL in chat and ask Claude to /job-evaluate it)'),
+      ].join('\n'),
+      visibleRows: [],
+      totalRows: 0,
+    };
+  }
+
+  const filtered = filter
+    ? reports.filter((r) => {
+        const q = filter.toLowerCase();
+        return [r.company, r.role, r.status].some((f) => String(f).toLowerCase().includes(q));
+      })
+    : reports;
+
+  // Score buckets
+  const buckets = { 'high (4.0+)': 0, 'medium (3.0-3.9)': 0, 'low (<3.0)': 0 };
+  for (const r of filtered) {
+    if (r.fit_score >= 4.0) buckets['high (4.0+)'] += 1;
+    else if (r.fit_score >= 3.0) buckets['medium (3.0-3.9)'] += 1;
+    else buckets['low (<3.0)'] += 1;
+  }
+  const summary = Object.entries(buckets).map(([k, n]) => [k, String(n)]);
+  summary.push([color(ANSI.bold, 'total'), color(ANSI.bold, String(filtered.length))]);
+
+  const visible = filtered.slice(scroll, scroll + 15);
+  const rowColors = visible.map((r) => fitColor(r.fit_score));
+
+  const cols = narrow
+    ? [
+        { label: 'Date', max: 11 },
+        { label: 'Fit', max: 5, align: 'right' },
+        { label: 'Company', max: 22 },
+        { label: 'Status', max: 12 },
+      ]
+    : [
+        { label: 'Date', max: 11 },
+        { label: 'Fit', max: 5, align: 'right' },
+        { label: 'Company', max: 22 },
+        { label: 'Role', max: 28 },
+        { label: 'Status', max: 14 },
+        { label: 'Report', max: 30 },
+      ];
+
+  const detailRows = visible.map((r) =>
+    narrow
+      ? [
+          (r.evaluated_at || '-').slice(0, 10),
+          r.fit_score ? r.fit_score.toFixed(1) : '-',
+          truncate(r.company || '-', 22),
+          truncate(r.status || '-', 12),
+        ]
+      : [
+          (r.evaluated_at || '-').slice(0, 10),
+          r.fit_score ? r.fit_score.toFixed(1) : '-',
+          truncate(r.company || '-', 22),
+          truncate(r.role || '-', 28),
+          truncate(r.status || '-', 14),
+          truncate(r.relPath, 30),
+        ],
+  );
+
+  const filterTag = filter
+    ? color(ANSI.yellow, ` (filter: "${filter}" — ${filtered.length}/${reports.length})`)
+    : '';
+
+  return {
+    output: [
+      renderTable({
+        title: 'Reports — fit-score breakdown',
+        columns: [{ label: 'Bucket', max: 18 }, { label: 'Count', align: 'right', min: 6 }],
+        rows: summary,
+      }),
+      '',
+      renderTable({
+        title: `Reports — recent ${visible.length} of ${filtered.length}` + filterTag,
+        columns: cols,
+        rows: detailRows,
+        highlight,
+        rowColors,
+      }),
+    ].join('\n'),
+    visibleRows: visible,
+    totalRows: filtered.length,
+  };
+}
+
+function renderReportDetail(report, height) {
+  if (!report) return '';
+  const lines = [];
+  lines.push(color(ANSI.bold + ANSI.cyan, '─── Report '.padEnd(60, '─')));
+  lines.push('');
+  lines.push(`  ${color(ANSI.bold, 'Company:')}  ${report.company || '(none)'}`);
+  lines.push(`  ${color(ANSI.bold, 'Role:')}     ${report.role || '(none)'}`);
+  lines.push(`  ${color(ANSI.bold, 'Fit score:')} ${color(fitColor(report.fit_score), (report.fit_score || 0).toFixed(1) + ' / 5.0')}`);
+  lines.push(`  ${color(ANSI.bold, 'Status:')}   ${report.status}`);
+  lines.push(`  ${color(ANSI.bold, 'Date:')}     ${(report.evaluated_at || '').slice(0, 10)}`);
+  if (report.url) lines.push(`  ${color(ANSI.bold, 'URL:')}      ${color(ANSI.blue, truncate(report.url, 50))}`);
+  lines.push(`  ${color(ANSI.bold, 'File:')}     ${color(ANSI.dim, report.relPath)}`);
+  lines.push('');
+  lines.push(color(ANSI.dim, '─── Body ───'));
+  lines.push('');
+  // Show first ~25 lines of the body, indented
+  const bodyLines = (report.body || '').split('\n').slice(0, height - 12);
+  for (const line of bodyLines) {
+    lines.push('  ' + truncate(line, 56));
+  }
+  if ((report.body || '').split('\n').length > bodyLines.length) {
+    lines.push('');
+    lines.push(color(ANSI.dim, `  …open ${report.relPath} for the full report`));
+  }
+  return lines.join('\n');
+}
+
+// --------------------------------------------------------------------------
+// Artifact counter (PDFs, prep notes) — shown in footer
+// --------------------------------------------------------------------------
+
+function countArtifacts(root) {
+  const pdfDir = path.join(root, 'output');
+  const prepDir = path.join(root, 'interview-prep');
+  let pdfs = 0;
+  let preps = 0;
+  try { pdfs = fs.readdirSync(pdfDir).filter((f) => f.endsWith('.pdf')).length; } catch (_) { /* none */ }
+  try { preps = fs.readdirSync(prepDir).filter((f) => f.endsWith('.md')).length; } catch (_) { /* none */ }
+  return { pdfs, preps };
+}
+
 function renderDetailPane(row, sourceKey, height) {
   if (!row) return '';
   const lines = [];
@@ -752,7 +947,7 @@ function renderHelpOverlay(termRows, termCols) {
     ['Navigation'],
     ['  tab / →     ', 'next tab'],
     ['  ←           ', 'previous tab'],
-    ['  1 2 3 4    ', 'jump to tab (Apps · Outreach · Follow-ups · Pipeline)'],
+    ['  1 2 3 4 5  ', 'jump to tab (Apps · Outreach · Follow-ups · Pipeline · Reports)'],
     ['  ↑ ↓ j k    ', 'scroll rows up / down'],
     [''],
     ['Filtering'],
@@ -798,8 +993,12 @@ function renderHelpOverlay(termRows, termCols) {
 
 function printSnapshot(data) {
   const { applications, outreach, root } = data;
+  const artifacts = countArtifacts(root);
   process.stdout.write(color(ANSI.bold, '\nAI Job Agent Dashboard') + '\n');
-  process.stdout.write(color(ANSI.dim, `  ${root}`) + '\n\n');
+  process.stdout.write(color(ANSI.dim, `  ${root}`) + '\n');
+  process.stdout.write(
+    color(ANSI.dim, `  artifacts: ${artifacts.pdfs} CV PDF(s) · ${artifacts.preps} interview prep note(s)\n\n`),
+  );
   if (applications.error || outreach.error) {
     process.stdout.write(color(ANSI.red, `  error: ${applications.error || outreach.error}\n`));
     return;
@@ -808,6 +1007,8 @@ function printSnapshot(data) {
   process.stdout.write(viewOutreach(outreach, 0).output + '\n\n');
   process.stdout.write(viewFollowups(outreach, 0).output + '\n\n');
   process.stdout.write(viewPipeline(applications, outreach).output + '\n\n');
+  const reportsView = viewReports(applications, outreach, { root });
+  process.stdout.write(reportsView.output + '\n\n');
   process.stdout.write(
     color(ANSI.dim, '  For live interactive view: run `npm run dashboard` in a terminal tab. Press ? once running for keybinds.\n'),
   );
@@ -822,6 +1023,7 @@ const TABS = [
   { key: 'outreach', label: 'Outreach', render: viewOutreach, source: 'outreach' },
   { key: 'followups', label: 'Follow-ups', render: viewFollowups, source: 'outreach' },
   { key: 'pipeline', label: 'Pipeline', render: viewPipeline, source: 'pipeline' },
+  { key: 'reports', label: 'Reports', render: viewReports, source: 'reports' },
 ];
 
 function runInteractive(initialData, root) {
@@ -906,10 +1108,15 @@ function runInteractive(initialData, root) {
 
     process.stdout.write(ANSI.clear);
 
-    // Header
+    // Header — title + path + artifact counts
+    const artifacts = countArtifacts(root);
     const title = ' AI Job Agent Dashboard ';
     process.stdout.write(color(ANSI.bg.blue + ANSI.bold + ANSI.white, title));
-    process.stdout.write(color(ANSI.dim, '  ' + root) + '\n\n');
+    process.stdout.write(color(ANSI.dim, '  ' + root));
+    if (artifacts.pdfs || artifacts.preps) {
+      process.stdout.write(color(ANSI.dim, `   📑 ${artifacts.pdfs} PDF · 🎤 ${artifacts.preps} prep`));
+    }
+    process.stdout.write('\n\n');
 
     // Tabs
     const tabLine = TABS.map((t, i) => {
@@ -924,6 +1131,14 @@ function runInteractive(initialData, root) {
     let viewResult;
     if (current.key === 'pipeline') {
       viewResult = viewPipeline(state.applications, state.outreach);
+    } else if (current.key === 'reports') {
+      viewResult = viewReports(state.applications, state.outreach, {
+        filter: state.filterQuery,
+        highlight: state.cursor,
+        narrow: splitPane || narrow,
+        scroll: state.scroll,
+        root,
+      });
     } else {
       const data = state[current.source];
       if (data && data.error) {
@@ -945,7 +1160,12 @@ function runInteractive(initialData, root) {
 
     // Right-side detail pane
     if (splitPane && state.detailRow) {
-      const detailLines = renderDetailPane(state.detailRow, current.source, rows - 8).split('\n');
+      // Reports tab uses a markdown-aware detail renderer; other tabs use the
+      // generic field-list pane.
+      const detailContent = current.key === 'reports'
+        ? renderReportDetail(state.detailRow, rows - 8)
+        : renderDetailPane(state.detailRow, current.source, rows - 8);
+      const detailLines = detailContent.split('\n');
       detailLines.forEach((line, i) => {
         process.stdout.write(`\x1b[${4 + i};${listWidth + 2}H${line}`);
       });
@@ -1082,7 +1302,7 @@ function runInteractive(initialData, root) {
       state.scroll = 0;
       state.cursor = 0;
       state.filterQuery = '';
-    } else if (ch === '1' || ch === '2' || ch === '3' || ch === '4') {
+    } else if (ch === '1' || ch === '2' || ch === '3' || ch === '4' || ch === '5') {
       state.tab = Math.min(TABS.length - 1, Number(ch) - 1);
       state.scroll = 0;
       state.cursor = 0;
